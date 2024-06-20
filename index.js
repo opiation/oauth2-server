@@ -4,32 +4,51 @@
  * Expose server and request/response classes.
  */
 
-exports = module.exports = require('./lib/server');
-exports.Request = require('./lib/request');
-exports.Response = require('./lib/response');
+import Request from './lib/request.js';
+import Response from './lib/response.js';
+export { Request, Response };
 
 /**
  * Export helpers for extension grants.
  */
 
-exports.AbstractGrantType = require('./lib/grant-types/abstract-grant-type');
+import AbstractGrantType from './lib/grant-types/abstract-grant-type.js';
+export { AbstractGrantType };
 
 /**
  * Export error classes.
  */
 
-exports.AccessDeniedError = require('./lib/errors/access-denied-error');
-exports.InsufficientScopeError = require('./lib/errors/insufficient-scope-error');
-exports.InvalidArgumentError = require('./lib/errors/invalid-argument-error');
-exports.InvalidClientError = require('./lib/errors/invalid-client-error');
-exports.InvalidGrantError = require('./lib/errors/invalid-grant-error');
-exports.InvalidRequestError = require('./lib/errors/invalid-request-error');
-exports.InvalidScopeError = require('./lib/errors/invalid-scope-error');
-exports.InvalidTokenError = require('./lib/errors/invalid-token-error');
-exports.OAuthError = require('./lib/errors/oauth-error');
-exports.ServerError = require('./lib/errors/server-error');
-exports.UnauthorizedClientError = require('./lib/errors/unauthorized-client-error');
-exports.UnauthorizedRequestError = require('./lib/errors/unauthorized-request-error');
-exports.UnsupportedGrantTypeError = require('./lib/errors/unsupported-grant-type-error');
-exports.UnsupportedResponseTypeError = require('./lib/errors/unsupported-response-type-error');
+import AccessDeniedError from './lib/errors/access-denied-error.js';
+import InsufficientScopeError from './lib/errors/insufficient-scope-error.js';
+import InvalidArgumentError from './lib/errors/invalid-argument-error.js';
+import InvalidClientError from './lib/errors/invalid-client-error.js';
+import InvalidGrantError from './lib/errors/invalid-grant-error.js';
+import InvalidRequestError from './lib/errors/invalid-request-error.js';
+import InvalidScopeError from './lib/errors/invalid-scope-error.js';
+import InvalidTokenError from './lib/errors/invalid-token-error.js';
+import OAuthError from './lib/errors/oauth-error.js';
+import ServerError from './lib/errors/server-error.js';
+import UnauthorizedClientError from './lib/errors/unauthorized-client-error.js';
+import UnauthorizedRequestError from './lib/errors/unauthorized-request-error.js';
+import UnsupportedGrantTypeError from './lib/errors/unsupported-grant-type-error.js';
+import UnsupportedResponseTypeError from './lib/errors/unsupported-response-type-error.js';
+import OAuth2Server from './lib/server.js';
+export {
+  AccessDeniedError,
+  InsufficientScopeError,
+  InvalidArgumentError,
+  InvalidClientError,
+  InvalidGrantError,
+  InvalidRequestError,
+  InvalidScopeError,
+  InvalidTokenError,
+  OAuthError,
+  ServerError,
+  UnauthorizedClientError,
+  UnauthorizedRequestError,
+  UnsupportedGrantTypeError,
+  UnsupportedResponseTypeError,
+};
 
+export default OAuth2Server;

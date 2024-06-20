@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-const chai = require('chai');
+import chai from 'chai';
 
 /**
  * SHA-256 assertion.

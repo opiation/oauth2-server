@@ -1,12 +1,12 @@
-const Request = require('../../lib/request');
+import Request from '../../lib/request.js';
 
-module.exports = (request) => {
+export default (request) => {
   const req = new Request({
     query: {},
     body: {},
     headers: {},
     method: 'GET',
-    ...request
+    ...request,
   });
 
   req.is = function (header) {

@@ -14,7 +14,6 @@
  *         resource owner.
  */
 
-
 /**
  * Response
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
@@ -57,53 +56,61 @@
  *         information about the error, used to provide the client
  *         developer with additional information about the error.
  */
-const OAuth2Server = require('../..');
-const DB = require('../helpers/db');
-const createModel = require('../helpers/model');
-const createRequest = require('../helpers/request');
-const Response = require('../../lib/response');
-const should = require('chai').should();
+import OAuth2Server from '../../index.js';
+import DB from '../helpers/db.js';
+import createModel from '../helpers/model.js';
+import createRequest from '../helpers/request.js';
+import Response from '../../lib/response.js';
 
-require('chai').should();
+import Chai from 'chai';
+const should = Chai.should();
 
 const db = new DB();
 
 const auth = new OAuth2Server({
-  model: createModel(db)
+  model: createModel(db),
 });
 
-const user = db.saveUser({ id: 1, username: 'test', password: 'test'});
-const client = db.saveClient({ id: 'a', secret: 'b', grants: ['password', 'refresh_token'] });
+const user = db.saveUser({ id: 1, username: 'test', password: 'test' });
+const client = db.saveClient({
+  id: 'a',
+  secret: 'b',
+  grants: ['password', 'refresh_token'],
+});
 const scope = 'read write';
 
-function createLoginRequest () {
+function createLoginRequest() {
   return createRequest({
     body: {
       grant_type: 'password',
       username: user.username,
       password: user.password,
-      scope
+      scope,
     },
     headers: {
-      'authorization': 'Basic ' + Buffer.from(client.id + ':' + client.secret).toString('base64'),
-      'content-type': 'application/x-www-form-urlencoded'
+      authorization:
+        'Basic ' +
+        Buffer.from(client.id + ':' + client.secret).toString('base64'),
+      'content-type': 'application/x-www-form-urlencoded',
     },
     method: 'POST',
   });
 }
 
-function createRefreshRequest (refresh_token) {
+function createRefreshRequest(refresh_token) {
   return createRequest({
     method: 'POST',
     body: {
       grant_type: 'refresh_token',
       refresh_token,
-      scope
+      scope,
     },
     headers: {
-      'authorization': 'Basic ' + Buffer.from(client.id + ':' + client.secret).toString('base64'),
-      'content-type': 'application/x-www-form-urlencoded'
-    }
+      authorization:
+        'Basic ' +
+        Buffer.from(client.id + ':' + client.secret).toString('base64'),
+      'content-type': 'application/x-www-form-urlencoded',
+    },
   });
 }
 
@@ -140,10 +147,12 @@ describe('RefreshTokenGrantType Compliance', function () {
       const request = createRefreshRequest('invalid');
       const response = new Response({});
 
-      await auth.token(request, response, {})
+      await auth
+        .token(request, response, {})
         .then(() => {
           throw Error('Should not reach this');
-        }).catch(err => {
+        })
+        .catch((err) => {
           err.name.should.equal('invalid_grant');
         });
     });
@@ -159,9 +168,10 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       refreshRequest.body.scope = 'invalid';
 
-      await auth.token(refreshRequest, refreshResponse, {})
+      await auth
+        .token(refreshRequest, refreshResponse, {})
         .then(should.fail)
-        .catch(err => {
+        .catch((err) => {
           err.name.should.equal('invalid_scope');
         });
     });
@@ -179,9 +189,10 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       refreshRequest.scope = 'read write';
 
-      await auth.token(refreshRequest, refreshResponse, {})
+      await auth
+        .token(refreshRequest, refreshResponse, {})
         .then(should.fail)
-        .catch(err => {
+        .catch((err) => {
           err.name.should.equal('invalid_scope');
         });
     });
@@ -199,9 +210,10 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       refreshRequest.scope = 'read write';
 
-      await auth.token(refreshRequest, refreshResponse, {})
+      await auth
+        .token(refreshRequest, refreshResponse, {})
         .then(should.fail)
-        .catch(err => {
+        .catch((err) => {
           err.name.should.equal('invalid_scope');
         });
     });

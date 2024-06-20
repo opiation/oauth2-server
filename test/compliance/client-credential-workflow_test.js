@@ -14,13 +14,14 @@
  *    @see https://www.rfc-editor.org/rfc/rfc6749#section-4.4
  */
 
-const OAuth2Server = require('../..');
-const DB = require('../helpers/db');
-const createModel = require('../helpers/model');
-const createRequest = require('../helpers/request');
-const Response = require('../../lib/response');
+import OAuth2Server from '../../index.js';
+import DB from '../helpers/db.js';
+import createModel from '../helpers/model.js';
+import createRequest from '../helpers/request.js';
+import Response from '../../lib/response.js';
 
-require('chai').should();
+import Chai from 'chai';
+Chai.should();
 
 const db = new DB();
 // this user represents requests in the name of an external server
@@ -37,14 +38,14 @@ const oAuth2Server = new OAuth2Server({
       // but we need to return a truthy response to
       const client = db.findClient(_client.id, _client.secret);
       return client && { ...userDoc };
-    }
-  }
+    },
+  },
 });
 
 const clientDoc = db.saveClient({
   id: 'client-credential-test-client',
   secret: 'client-credential-test-secret',
-  grants: ['client_credentials']
+  grants: ['client_credentials'],
 });
 
 const enabledScope = 'read write';
@@ -74,11 +75,15 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
       const request = createRequest({
         body: {
           grant_type: 'client_credentials',
-          scope: enabledScope
+          scope: enabledScope,
         },
         headers: {
-          'authorization': 'Basic ' + Buffer.from(clientDoc.id + ':' + clientDoc.secret).toString('base64'),
-          'content-type': 'application/x-www-form-urlencoded'
+          authorization:
+            'Basic ' +
+            Buffer.from(clientDoc.id + ':' + clientDoc.secret).toString(
+              'base64'
+            ),
+          'content-type': 'application/x-www-form-urlencoded',
         },
         method: 'POST',
       });
@@ -86,7 +91,10 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
       const token = await oAuth2Server.token(request, response);
 
       response.status.should.equal(200);
-      response.headers.should.deep.equal( { 'cache-control': 'no-store', pragma: 'no-cache' });
+      response.headers.should.deep.equal({
+        'cache-control': 'no-store',
+        pragma: 'no-cache',
+      });
       response.body.token_type.should.equal('Bearer');
       response.body.access_token.should.equal(token.accessToken);
       response.body.expires_in.should.be.a('number');
@@ -119,9 +127,9 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
       const [accessToken] = [...db.accessTokens.entries()][0];
       const response = new Response();
       const request = createRequest({
-        query:  {},
+        query: {},
         headers: {
-          'authorization': `Bearer ${accessToken}`
+          authorization: `Bearer ${accessToken}`,
         },
         method: 'GET',
       });

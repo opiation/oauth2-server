@@ -1,17 +1,28 @@
-const { parseScope } = require('../../../lib/utils/scope-util');
-const should = require('chai').should();
+import { parseScope } from '../../../lib/utils/scope-util.js';
+import Chai from 'chai';
+const should = Chai.should();
 
 describe(parseScope.name, () => {
   it('should return undefined on nullish values', () => {
     const values = [undefined, null];
-    values.forEach(str => {
+    values.forEach((str) => {
       const compare = parseScope(str) === undefined;
       compare.should.equal(true);
     });
   });
   it('should throw on non-string values', () => {
-    const invalid = [1, -1, true, false, {}, ['foo'], [], () => {}, Symbol('foo')];
-    invalid.forEach(str => {
+    const invalid = [
+      1,
+      -1,
+      true,
+      false,
+      {},
+      ['foo'],
+      [],
+      () => {},
+      Symbol('foo'),
+    ];
+    invalid.forEach((str) => {
       try {
         parseScope(str);
         should.fail();
@@ -22,7 +33,7 @@ describe(parseScope.name, () => {
   });
   it('should throw on empty strings', () => {
     const invalid = ['', ' ', '      ', '\n', '\t', '\r'];
-    invalid.forEach(str => {
+    invalid.forEach((str) => {
       try {
         parseScope(str);
         should.fail();

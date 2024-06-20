@@ -1,12 +1,13 @@
-const TokenModel = require('../../../lib/models/token-model');
-const InvalidArgumentError = require('../../../lib/errors/invalid-argument-error');
-const should = require('chai').should();
+import TokenModel from '../../../lib/models/token-model.js';
+import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
+import Chai from 'chai';
+const should = Chai.should();
 /**
  * Test `Server`.
  */
 
-describe('Model', function() {
-  describe('constructor()', function() {
+describe('Model', function () {
+  describe('constructor()', function () {
     it('throws, if data is empty', function () {
       try {
         new TokenModel();
@@ -23,7 +24,7 @@ describe('Model', function() {
       const data = {
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt
+        accessTokenExpiresAt: atExpiresAt,
       };
 
       try {
@@ -41,7 +42,7 @@ describe('Model', function() {
       const data = {
         accessToken: 'foo',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt
+        accessTokenExpiresAt: atExpiresAt,
       };
 
       try {
@@ -59,7 +60,7 @@ describe('Model', function() {
       const data = {
         accessToken: 'foo',
         client: 'bar',
-        accessTokenExpiresAt: atExpiresAt
+        accessTokenExpiresAt: atExpiresAt,
       };
 
       try {
@@ -75,7 +76,7 @@ describe('Model', function() {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: '11/10/2023'
+        accessTokenExpiresAt: '11/10/2023',
       };
 
       try {
@@ -91,7 +92,7 @@ describe('Model', function() {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        refreshTokenExpiresAt: '11/10/2023'
+        refreshTokenExpiresAt: '11/10/2023',
       };
 
       try {
@@ -102,17 +103,17 @@ describe('Model', function() {
         e.message.should.equal('Invalid parameter: `refreshTokenExpiresAt`');
       }
     });
-    it('should calculate `accessTokenLifetime` if `accessTokenExpiresAt` is set', function() {
+    it('should calculate `accessTokenLifetime` if `accessTokenExpiresAt` is set', function () {
       const atExpiresAt = new Date();
       atExpiresAt.setHours(new Date().getHours() + 1);
-  
+
       const data = {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt
+        accessTokenExpiresAt: atExpiresAt,
       };
-  
+
       const model = new TokenModel(data);
       should.exist(model.accessTokenLifetime);
       model.accessTokenLifetime.should.a('number');
@@ -130,7 +131,7 @@ describe('Model', function() {
         accessToken: 'token',
         client: 'client',
         user: 'user',
-        myCustomAttribute: 'myCustomValue'
+        myCustomAttribute: 'myCustomValue',
       });
 
       should.not.exist(model['myCustomAttribute']);
@@ -138,18 +139,23 @@ describe('Model', function() {
     });
 
     it('should set custom attributes on the customAttributes field if allowExtendedTokenAttributes is specified as true', () => {
-      const model = new TokenModel({
-        accessToken: 'token',
-        client: 'client',
-        user: 'user',
-        myCustomAttribute: 'myCustomValue'
-      }, {
-        allowExtendedTokenAttributes: true
-      });
+      const model = new TokenModel(
+        {
+          accessToken: 'token',
+          client: 'client',
+          user: 'user',
+          myCustomAttribute: 'myCustomValue',
+        },
+        {
+          allowExtendedTokenAttributes: true,
+        }
+      );
 
       should.not.exist(model['myCustomAttribute']);
       model['customAttributes'].should.be.an('object');
-      model['customAttributes']['myCustomAttribute'].should.equal('myCustomValue');
+      model['customAttributes']['myCustomAttribute'].should.equal(
+        'myCustomValue'
+      );
     });
   });
 });

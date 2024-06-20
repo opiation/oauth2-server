@@ -4,27 +4,38 @@
  * Module dependencies.
  */
 
-const Request = require('../../../lib/request');
-const TokenHandler = require('../../../lib/handlers/token-handler');
-const sinon = require('sinon');
-const should = require('chai').should();
+import Request from '../../../lib/request.js';
+import TokenHandler from '../../../lib/handlers/token-handler.js';
+import sinon from 'sinon';
+import Chai from 'chai';
+const should = Chai.should();
 
 /**
  * Test `TokenHandler`.
  */
 
-describe('TokenHandler', function() {
-  describe('getClient()', function() {
-    it('should call `model.getClient()`', function() {
+describe('TokenHandler', function () {
+  describe('getClient()', function () {
+    it('should call `model.getClient()`', function () {
       const model = {
         getClient: sinon.stub().returns({ grants: ['password'] }),
-        saveToken: function() {}
+        saveToken: function () {},
       };
-      const handler = new TokenHandler({ accessTokenLifetime: 120, model: model, refreshTokenLifetime: 120 });
-      const request = new Request({ body: { client_id: 12345, client_secret: 'secret' }, headers: {}, method: {}, query: {} });
+      const handler = new TokenHandler({
+        accessTokenLifetime: 120,
+        model: model,
+        refreshTokenLifetime: 120,
+      });
+      const request = new Request({
+        body: { client_id: 12345, client_secret: 'secret' },
+        headers: {},
+        method: {},
+        query: {},
+      });
 
-      return handler.getClient(request)
-        .then(function() {
+      return handler
+        .getClient(request)
+        .then(function () {
           model.getClient.callCount.should.equal(1);
           model.getClient.firstCall.args.should.have.length(2);
           model.getClient.firstCall.args[0].should.equal(12345);

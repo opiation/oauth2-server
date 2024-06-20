@@ -4,9 +4,10 @@
  * Module dependencies.
  */
 
-const Request = require('../../lib/request');
-const InvalidArgumentError = require('../../lib/errors/invalid-argument-error');
-const should = require('chai').should();
+import Request from '../../lib/request.js';
+import InvalidArgumentError from '../../lib/errors/invalid-argument-error.js';
+import Chai from 'chai';
+const should = Chai.should();
 
 /**
  * Test `Request`.
@@ -15,26 +16,31 @@ const should = require('chai').should();
 function generateBaseRequest() {
   return {
     query: {
-      foo: 'bar'
+      foo: 'bar',
     },
     method: 'GET',
     headers: {
-      bar: 'foo'
+      bar: 'foo',
     },
     body: {
-      foobar: 'barfoo'
-    }
+      foobar: 'barfoo',
+    },
   };
 }
 
-describe('Request', function() {
+describe('Request', function () {
   it('should throw on missing args', function () {
     const args = [
       [undefined, InvalidArgumentError, 'Missing parameter: `headers`'],
+      // prettier-ignore
       [null, TypeError, 'Cannot destructure property \'headers\''],
       [{}, InvalidArgumentError, 'Missing parameter: `headers`'],
-      [{ headers: { }}, InvalidArgumentError, 'Missing parameter: `method`'],
-      [{ headers: {}, method: 'GET' }, InvalidArgumentError, 'Missing parameter: `query`'],
+      [{ headers: {} }, InvalidArgumentError, 'Missing parameter: `method`'],
+      [
+        { headers: {}, method: 'GET' },
+        InvalidArgumentError,
+        'Missing parameter: `query`',
+      ],
     ];
 
     args.forEach(([value, error, message]) => {
@@ -46,7 +52,7 @@ describe('Request', function() {
       }
     });
   });
-  it('should instantiate with a basic request', function() {
+  it('should instantiate with a basic request', function () {
     const originalRequest = generateBaseRequest();
 
     const request = new Request(originalRequest);
@@ -56,7 +62,7 @@ describe('Request', function() {
     request.body.should.eql(originalRequest.body);
   });
 
-  it('should allow a request to be passed without a body', function() {
+  it('should allow a request to be passed without a body', function () {
     const originalRequest = generateBaseRequest();
     delete originalRequest.body;
 
@@ -67,38 +73,40 @@ describe('Request', function() {
     request.body.should.eql({});
   });
 
-  it('should throw if headers are not passed to the constructor', function() {
+  it('should throw if headers are not passed to the constructor', function () {
     const originalRequest = generateBaseRequest();
     delete originalRequest.headers;
 
-    (function() {
+    (function () {
       new Request(originalRequest);
     }).should.throw('Missing parameter: `headers`');
   });
 
-  it('should throw if query string isn\'t passed to the constructor', function() {
+  // prettier-ignore
+  it('should throw if query string isn\'t passed to the constructor', function () {
     const originalRequest = generateBaseRequest();
     delete originalRequest.query;
 
-    (function() {
+    (function () {
       new Request(originalRequest);
     }).should.throw('Missing parameter: `query`');
   });
 
-  it('should throw if method isn\'t passed to the constructor', function() {
+  // prettier-ignore
+  it('should throw if method isn\'t passed to the constructor', function () {
     const originalRequest = generateBaseRequest();
     delete originalRequest.method;
 
-    (function() {
+    (function () {
       new Request(originalRequest);
     }).should.throw('Missing parameter: `method`');
   });
 
-  it('should convert all header keys to lowercase', function() {
+  it('should convert all header keys to lowercase', function () {
     const originalRequest = generateBaseRequest();
     originalRequest.headers = {
       Foo: 'bar',
-      BAR: 'foo'
+      BAR: 'foo',
     };
 
     const request = new Request(originalRequest);
@@ -108,14 +116,14 @@ describe('Request', function() {
     should.not.exist(request.headers.BAR);
   });
 
-  it('should include additional properties passed in the request', function() {
+  it('should include additional properties passed in the request', function () {
     const originalRequest = generateBaseRequest();
     originalRequest.custom = {
-      newFoo: 'newBar'
+      newFoo: 'newBar',
     };
 
     originalRequest.custom2 = {
-      newBar: 'newFoo'
+      newBar: 'newFoo',
     };
 
     const request = new Request(originalRequest);
@@ -127,14 +135,14 @@ describe('Request', function() {
     request.custom2.should.eql(originalRequest.custom2);
   });
 
-  it('should include additional properties passed in the request', function() {
+  it('should include additional properties passed in the request', function () {
     const originalRequest = generateBaseRequest();
     originalRequest.custom = {
-      newFoo: 'newBar'
+      newFoo: 'newBar',
     };
 
     originalRequest.custom2 = {
-      newBar: 'newFoo'
+      newBar: 'newFoo',
     };
 
     const request = new Request(originalRequest);
@@ -151,51 +159,59 @@ describe('Request', function() {
       query: {},
       method: 'GET',
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
       },
       get() {
         // malicious attempt to override the 'get' method
         return 'text/html';
-      }
+      },
     });
 
     request.get('content-type').should.equal('application/json');
   });
 
-  it('should allow getting of headers using `request.get`', function() {
+  it('should allow getting of headers using `request.get`', function () {
     const originalRequest = generateBaseRequest();
 
     const request = new Request(originalRequest);
     request.get('bar').should.eql(originalRequest.headers.bar);
   });
 
-  it('should allow getting of headers using `request.get`', function() {
+  it('should allow getting of headers using `request.get`', function () {
     const originalRequest = generateBaseRequest();
 
     const request = new Request(originalRequest);
     request.get('bar').should.eql(originalRequest.headers.bar);
   });
 
-  it('should allow getting of headers using `request.get`', function() {
+  it('should allow getting of headers using `request.get`', function () {
     const originalRequest = generateBaseRequest();
 
     const request = new Request(originalRequest);
     request.get('bar').should.eql(originalRequest.headers.bar);
   });
 
-  it('should validate the content-type', function() {
+  it('should validate the content-type', function () {
     const originalRequest = generateBaseRequest();
-    originalRequest.headers['content-type'] = 'application/x-www-form-urlencoded';
-    originalRequest.headers['content-length'] = JSON.stringify(originalRequest.body).length;
+    originalRequest.headers['content-type'] =
+      'application/x-www-form-urlencoded';
+    originalRequest.headers['content-length'] = JSON.stringify(
+      originalRequest.body
+    ).length;
 
     const request = new Request(originalRequest);
-    request.is('application/x-www-form-urlencoded').should.eql('application/x-www-form-urlencoded');
+    request
+      .is('application/x-www-form-urlencoded')
+      .should.eql('application/x-www-form-urlencoded');
   });
 
-  it('should return false if the content-type is invalid', function() {
+  it('should return false if the content-type is invalid', function () {
     const originalRequest = generateBaseRequest();
-    originalRequest.headers['content-type'] = 'application/x-www-form-urlencoded';
-    originalRequest.headers['content-length'] = JSON.stringify(originalRequest.body).length;
+    originalRequest.headers['content-type'] =
+      'application/x-www-form-urlencoded';
+    originalRequest.headers['content-length'] = JSON.stringify(
+      originalRequest.body
+    ).length;
 
     const request = new Request(originalRequest);
     request.is('application/json').should.eql(false);

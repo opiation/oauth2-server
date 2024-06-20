@@ -1,15 +1,15 @@
 const scopes = ['read', 'write'];
 
-function createModel (db) {
-  async function getUser (username, password) {
+export default function createModel(db) {
+  async function getUser(username, password) {
     return db.findUser(username, password);
   }
 
-  async function getClient (clientId, clientSecret) {
+  async function getClient(clientId, clientSecret) {
     return db.findClient(clientId, clientSecret);
   }
 
-  async function saveToken (token, client, user) {
+  async function saveToken(token, client, user) {
     if (token.scope && !Array.isArray(token.scope)) {
       throw new Error('Scope should internally be an array');
     }
@@ -18,7 +18,7 @@ function createModel (db) {
       userId: user.id,
       scope: token.scope,
       accessTokenExpiresAt: token.accessTokenExpiresAt,
-      refreshTokenExpiresAt: token.refreshTokenExpiresAt
+      refreshTokenExpiresAt: token.refreshTokenExpiresAt,
     };
 
     token.client = client;
@@ -35,7 +35,7 @@ function createModel (db) {
     return token;
   }
 
-  async function getAccessToken (accessToken) {
+  async function getAccessToken(accessToken) {
     const meta = db.findAccessToken(accessToken);
 
     if (!meta) {
@@ -49,11 +49,11 @@ function createModel (db) {
       accessTokenExpiresAt: meta.accessTokenExpiresAt,
       user: db.findUserById(meta.userId),
       client: db.findClientById(meta.clientId),
-      scope: meta.scope
+      scope: meta.scope,
     };
   }
 
-  async function getRefreshToken (refreshToken) {
+  async function getRefreshToken(refreshToken) {
     const meta = db.findRefreshToken(refreshToken);
 
     if (!meta) {
@@ -67,32 +67,30 @@ function createModel (db) {
       refreshTokenExpiresAt: meta.refreshTokenExpiresAt,
       user: db.findUserById(meta.userId),
       client: db.findClientById(meta.clientId),
-      scope: meta.scope
+      scope: meta.scope,
     };
   }
 
-  async function revokeToken (token) {
+  async function revokeToken(token) {
     db.deleteRefreshToken(token.refreshToken);
 
     return true;
   }
 
-  async function verifyScope (token, scope) {
+  async function verifyScope(token, scope) {
     if (!Array.isArray(scope)) {
       throw new Error('Scope should internally be an array');
     }
-    return scope.every(s => scopes.includes(s));
+    return scope.every((s) => scopes.includes(s));
   }
 
-  return  {
+  return {
     getUser,
     getClient,
     saveToken,
     getAccessToken,
     getRefreshToken,
     revokeToken,
-    verifyScope
+    verifyScope,
   };
 }
-
-module.exports = createModel;
