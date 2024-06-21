@@ -5,10 +5,9 @@
  */
 
 import pkce from '../../../lib/pkce/pkce.js';
-import Chai from 'chai';
-const should = Chai.should();
 import { base64URLEncode } from '../../../lib/utils/string-util.js';
 import { createHash } from '../../../lib/utils/crypto-util.js';
+import { describe, expect, it } from '../../test-utils.js';
 
 describe('PKCE', function () {
   describe(pkce.isPKCERequest.name, function () {
@@ -18,20 +17,19 @@ describe('PKCE', function () {
         [
           true,
           'authorization_code',
-          '123123123123123123123123123123123123123123123',
+          '123123123123123123123123123123123123123123123'
         ],
         [false, 'authorization_code', ''],
         [false, 'authorization_code', undefined],
         [false, 'foo_code', '123123123123123123123123123123123123123123123'],
         [false, '', '123123123123123123123123123123123123123123123'],
         [false, undefined, '123123123123123123123123123123123123123123123'],
-        [false, 'foo_code', 'bar'],
+        [false, 'foo_code', 'bar']
       ].forEach((triple) => {
-        should.equal(
-          triple[0],
+        expect(triple[0]).to.equal(
           pkce.isPKCERequest({
             grantType: triple[1],
-            codeVerifier: triple[2],
+            codeVerifier: triple[2]
           })
         );
       });
@@ -47,18 +45,19 @@ describe('PKCE', function () {
         [false, '123123123112312312311231231231123123123112+'], // invalid chars
         [
           false,
-          '123123123112312312311231231231123123123112312312311231231231123123123112312312311231231231123123123112312312311231231231123123123',
+          '123123123112312312311231231231123123123112312312311231231231123123123112312312311231231231123123123112312312311231231231123123123'
         ], // too long
         // invalid chars
         [
           true,
-          '-_.~abcdefghijklmnopqrstuvwxyz0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ',
-        ],
+          '-_.~abcdefghijklmnopqrstuvwxyz0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ'
+        ]
       ].forEach((pair) => {
-        should.equal(pair[0], pkce.codeChallengeMatchesABNF(pair[1]));
+        expect(pair[0]).equal(pkce.codeChallengeMatchesABNF(pair[1]));
       });
     });
   });
+
   describe(pkce.getHashForCodeChallenge.name, function () {
     it('returns nothing if method is not valid', function () {
       const verifier =
@@ -68,17 +67,17 @@ describe('PKCE', function () {
         [undefined, undefined, verifier],
         [undefined, null, verifier],
         [undefined, '', verifier],
-        [undefined, 'foo', verifier],
+        [undefined, 'foo', verifier]
       ].forEach((triple) => {
-        should.equal(
-          triple[0],
+        expect(triple[0]).to.equal(
           pkce.getHashForCodeChallenge({
             method: triple[1],
-            verifier: triple[2],
+            verifier: triple[2]
           })
         );
       });
     });
+
     it('return the verifier on plain and undefined on S256 if verifier is falsy', function () {
       [
         [undefined, 'plain', undefined],
@@ -86,37 +85,39 @@ describe('PKCE', function () {
         [undefined, 'plain', ''],
         [undefined, 'S256', ''],
         [undefined, 'plain', null],
-        [undefined, 'S256', null],
+        [undefined, 'S256', null]
       ].forEach((triple) => {
-        should.equal(
-          triple[0],
+        expect(triple[0]).to.equal(
           pkce.getHashForCodeChallenge({
             method: triple[1],
-            verifier: triple[2],
+            verifier: triple[2]
           })
         );
       });
     });
+
     it('returns the unhashed verifier when method is plain', function () {
       const verifier =
         '-_.~abcdefghijklmnopqrstuvwxyz0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ';
       const hash = pkce.getHashForCodeChallenge({ method: 'plain', verifier });
-      should.equal(hash, verifier);
+      expect(hash).to.equal(verifier);
     });
+
     it('returns the hash verifier when method is S256', function () {
       const verifier =
         '-_.~abcdefghijklmnopqrstuvwxyz0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ';
       const hash = pkce.getHashForCodeChallenge({ method: 'S256', verifier });
       const expectedHash = base64URLEncode(createHash({ data: verifier }));
-      should.equal(hash, expectedHash);
+      expect(hash).to.equal(expectedHash);
     });
   });
+
   describe(pkce.isValidMethod.name, function () {
     it('returns if a method is plain or S256', function () {
-      should.equal(pkce.isValidMethod('plain'), true);
-      should.equal(pkce.isValidMethod('S256'), true);
-      should.equal(pkce.isValidMethod('foo'), false);
-      should.equal(pkce.isValidMethod(), false);
+      expect(pkce.isValidMethod('plain')).to.be.true;
+      expect(pkce.isValidMethod('S256')).to.be.true;
+      expect(pkce.isValidMethod('foo')).to.be.false;
+      expect(pkce.isValidMethod()).to.be.false;
     });
   });
 });

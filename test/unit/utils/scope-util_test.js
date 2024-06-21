@@ -1,16 +1,15 @@
 import { parseScope } from '../../../lib/utils/scope-util.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../../test-utils.js';
 
 describe(parseScope.name, () => {
-  it('should return undefined on nullish values', () => {
+  it('returns undefined on nullish values', () => {
     const values = [undefined, null];
     values.forEach((str) => {
-      const compare = parseScope(str) === undefined;
-      compare.should.equal(true);
+      expect(parseScope(str)).to.be.undefined;
     });
   });
-  it('should throw on non-string values', () => {
+
+  it('throws on non-string values', () => {
     const invalid = [
       1,
       -1,
@@ -20,37 +19,39 @@ describe(parseScope.name, () => {
       ['foo'],
       [],
       () => {},
-      Symbol('foo'),
+      Symbol('foo')
     ];
     invalid.forEach((str) => {
       try {
         parseScope(str);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.message.should.eql('Invalid parameter: `scope`');
+        expect(e.message).to.eql('Invalid parameter: `scope`');
       }
     });
   });
-  it('should throw on empty strings', () => {
+
+  it('throws on empty strings', () => {
     const invalid = ['', ' ', '      ', '\n', '\t', '\r'];
     invalid.forEach((str) => {
       try {
         parseScope(str);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.message.should.eql('Invalid parameter: `scope`');
+        expect(e.message).to.eql('Invalid parameter: `scope`');
       }
     });
   });
-  it('should split space-delimited strings into arrays', () => {
+
+  it('splits space-delimited strings into arrays', () => {
     const values = [
       ['foo', ['foo']],
       ['foo bar', ['foo', 'bar']],
-      ['foo       bar', ['foo', 'bar']],
+      ['foo       bar', ['foo', 'bar']]
     ];
+
     values.forEach(([str, compare]) => {
-      const parsed = parseScope(str);
-      parsed.should.deep.equal(compare);
+      expect(parseScope(str)).to.deep.equal(compare);
     });
   });
 });

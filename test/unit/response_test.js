@@ -5,8 +5,7 @@
  */
 
 import Response from '../../lib/response.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 /**
  * Test `Request`.
@@ -15,121 +14,121 @@ const should = Chai.should();
 function generateBaseResponse() {
   return {
     headers: {
-      bar: 'foo',
+      bar: 'foo'
     },
     body: {
-      foobar: 'barfoo',
-    },
+      foobar: 'barfoo'
+    }
   };
 }
 
 describe('Request', function () {
-  it('should instantiate with a basic request', function () {
+  it('instantiates with a basic request', function () {
     const originalResponse = generateBaseResponse();
 
     const response = new Response(originalResponse);
-    response.headers.should.eql(originalResponse.headers);
-    response.body.should.eql(originalResponse.body);
-    response.status.should.eql(200);
+    expect(response.headers).to.eql(originalResponse.headers);
+    expect(response.body).to.eql(originalResponse.body);
+    expect(response.status).to.eql(200);
   });
 
-  it('should allow a response to be passed without a body', function () {
+  it('allows a response to be passed without a body', function () {
     const originalResponse = generateBaseResponse();
     delete originalResponse.body;
 
     const response = new Response(originalResponse);
-    response.headers.should.eql(originalResponse.headers);
-    response.body.should.eql({});
-    response.status.should.eql(200);
+    expect(response.headers).to.eql(originalResponse.headers);
+    expect(response.body).to.eql({});
+    expect(response.status).to.eql(200);
   });
 
-  it('should allow a response to be passed without headers', function () {
+  it('allows a response to be passed without headers', function () {
     const originalResponse = generateBaseResponse();
     delete originalResponse.headers;
 
     const response = new Response(originalResponse);
-    response.headers.should.eql({});
-    response.body.should.eql(originalResponse.body);
-    response.status.should.eql(200);
+    expect(response.headers).to.eql({});
+    expect(response.body).to.eql(originalResponse.body);
+    expect(response.status).to.eql(200);
   });
 
-  it('should convert all header keys to lowercase', function () {
+  it('converts all header keys to lowercase', function () {
     const originalResponse = generateBaseResponse();
     originalResponse.headers = {
       Foo: 'bar',
-      BAR: 'foo',
+      BAR: 'foo'
     };
 
     const response = new Response(originalResponse);
-    response.headers.foo.should.eql('bar');
-    response.headers.bar.should.eql('foo');
-    should.not.exist(response.headers.Foo);
-    should.not.exist(response.headers.BAR);
+    expect(response.headers.foo).to.eql('bar');
+    expect(response.headers.bar).to.eql('foo');
+    expect(response.headers.Foo).not.to.exist;
+    expect(response.headers.BAR).not.to.exist;
   });
 
-  it('should include additional properties passed in the response', function () {
+  it('includes additional properties passed in the response', function () {
     const originalResponse = generateBaseResponse();
     originalResponse.custom = {
-      newFoo: 'newBar',
+      newFoo: 'newBar'
     };
 
     originalResponse.custom2 = {
-      newBar: 'newFoo',
+      newBar: 'newFoo'
     };
 
     const response = new Response(originalResponse);
-    response.headers.should.eql(originalResponse.headers);
-    response.body.should.eql(originalResponse.body);
-    response.custom.should.eql(originalResponse.custom);
-    response.custom2.should.eql(originalResponse.custom2);
+    expect(response.headers).to.eql(originalResponse.headers);
+    expect(response.body).to.eql(originalResponse.body);
+    expect(response.custom).to.eql(originalResponse.custom);
+    expect(response.custom2).to.eql(originalResponse.custom2);
   });
 
-  it('should not allow overwriting methods on the Response prototype via custom properties', () => {
+  it('does not allow overwriting methods on the Response prototype via custom properties', () => {
     const response = new Response({
       headers: {
-        'content-type': 'application/json',
+        'content-type': 'application/json'
       },
       get() {
         // malicious attempt to override the 'get' method
         return 'text/html';
-      },
+      }
     });
 
-    response.get('content-type').should.equal('application/json');
+    expect(response.get('content-type')).to.equal('application/json');
   });
 
-  it('should allow getting of headers using `response.get`', function () {
+  it('allows getting of headers using `response.get`', function () {
     const originalResponse = generateBaseResponse();
 
     const response = new Response(originalResponse);
-    response.get('bar').should.eql(originalResponse.headers.bar);
+    expect(response.get('bar')).to.eql(originalResponse.headers.bar);
   });
 
-  it('should allow getting of headers using `response.get`', function () {
+  it('allow getting of headers using `response.get`', function () {
     const originalResponse = generateBaseResponse();
 
     const response = new Response(originalResponse);
-    response.get('bar').should.eql(originalResponse.headers.bar);
+    expect(response.get('bar')).to.eql(originalResponse.headers.bar);
   });
 
-  it('should allow setting of headers using `response.set`', function () {
+  it('allows setting of headers using `response.set`', function () {
     const originalResponse = generateBaseResponse();
 
     const response = new Response(originalResponse);
-    response.headers.should.eql(originalResponse.headers);
+    expect(response.headers).to.eql(originalResponse.headers);
     response.set('newheader', 'newvalue');
-    response.headers.bar.should.eql('foo');
-    response.headers.newheader.should.eql('newvalue');
+    expect(response.headers.bar).to.eql('foo');
+    expect(response.headers.newheader).to.eql('newvalue');
   });
 
-  it('should process redirect', function () {
+  it('processs redirect', function () {
     const originalResponse = generateBaseResponse();
 
     const response = new Response(originalResponse);
-    response.headers.should.eql(originalResponse.headers);
-    response.status.should.eql(200);
+    expect(response.headers).to.eql(originalResponse.headers);
+    expect(response.status).to.eql(200);
     response.redirect('http://foo.bar');
-    response.headers.location.should.eql('http://foo.bar');
-    response.status.should.eql(302);
+    expect(response.headers.location).to.eql('http://foo.bar');
+    expect(response.status).to.eql(302);
   });
 });

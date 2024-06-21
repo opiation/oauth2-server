@@ -5,6 +5,7 @@
  */
 
 import Response from '../../lib/response.js';
+import { describe, expect, it } from '../test-utils.js';
 
 /**
  * Test `Response` integration.
@@ -12,70 +13,70 @@ import Response from '../../lib/response.js';
 
 describe('Response integration', function () {
   describe('constructor()', function () {
-    it('should set the `body`', function () {
+    it('sets the `body`', function () {
       const response = new Response({ body: 'foo', headers: {} });
 
-      response.body.should.equal('foo');
+      expect(response.body).to.equal('foo');
     });
 
-    it('should set the `headers`', function () {
+    it('sets the `headers`', function () {
       const response = new Response({
         body: {},
-        headers: { foo: 'bar', QuX: 'biz' },
+        headers: { foo: 'bar', QuX: 'biz' }
       });
 
-      response.headers.should.eql({ foo: 'bar', qux: 'biz' });
+      expect(response.headers).to.eql({ foo: 'bar', qux: 'biz' });
     });
 
-    it('should set the `status` to 200', function () {
+    it('sets the `status` to 200', function () {
       const response = new Response({ body: {}, headers: {} });
 
-      response.status.should.equal(200);
+      expect(response.status).to.equal(200);
     });
   });
 
   describe('get()', function () {
-    it('should return `undefined` if the field does not exist', function () {
+    it('returns `undefined` if the field does not exist', function () {
       const response = new Response({ body: {}, headers: {} });
 
-      (undefined === response.get('content-type')).should.be.true;
+      expect(response.get('content-type')).to.be.undefined;
     });
 
-    it('should return the value if the field exists', function () {
+    it('returns the value if the field exists', function () {
       const response = new Response({
         body: {},
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: { 'content-type': 'text/html; charset=utf-8' }
       });
 
-      response.get('Content-Type').should.equal('text/html; charset=utf-8');
+      expect(response.get('Content-Type')).to.equal('text/html; charset=utf-8');
     });
   });
 
   describe('redirect()', function () {
-    it('should set the location header to `url`', function () {
+    it('sets the location header to `url`', function () {
       const response = new Response({ body: {}, headers: {} });
 
       response.redirect('http://example.com');
 
-      response.get('Location').should.equal('http://example.com');
+      expect(response.get('Location')).to.equal('http://example.com');
     });
 
-    it('should set the `status` to 302', function () {
+    it('sets the `status` to 302', function () {
       const response = new Response({ body: {}, headers: {} });
 
       response.redirect('http://example.com');
 
-      response.status.should.equal(302);
+      expect(response.status).to.equal(302);
     });
   });
 
   describe('set()', function () {
-    it('should set the `field`', function () {
+    it('sets the `field`', function () {
       const response = new Response({ body: {}, headers: {} });
 
       response.set('foo', 'bar');
 
-      response.headers.should.eql({ foo: 'bar' });
+      expect(response.headers).to.eql({ foo: 'bar' });
     });
   });
 });

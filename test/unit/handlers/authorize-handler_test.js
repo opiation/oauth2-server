@@ -7,9 +7,7 @@
 import AuthorizeHandler from '../../../lib/handlers/authorize-handler.js';
 import Request from '../../../lib/request.js';
 import Response from '../../../lib/response.js';
-import sinon from 'sinon';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it, sinon } from '../../test-utils.js';
 
 /**
  * Test `AuthorizeHandler`.
@@ -17,138 +15,140 @@ const should = Chai.should();
 
 describe('AuthorizeHandler', function () {
   describe('generateAuthorizationCode()', function () {
-    it('should call `model.generateAuthorizationCode()`', function () {
+    it('calls `model.generateAuthorizationCode()`', function () {
       const model = {
         generateAuthorizationCode: sinon.stub().returns({}),
         getAccessToken: function () {},
         getClient: function () {},
-        saveAuthorizationCode: function () {},
+        saveAuthorizationCode: function () {}
       };
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
 
       return handler
         .generateAuthorizationCode()
         .then(function () {
-          model.generateAuthorizationCode.callCount.should.equal(1);
-          model.generateAuthorizationCode.firstCall.thisValue.should.equal(
+          expect(model.generateAuthorizationCode.callCount).to.equal(1);
+          expect(model.generateAuthorizationCode.firstCall.thisValue).to.equal(
             model
           );
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('getClient()', function () {
-    it('should call `model.getClient()`', function () {
+    it('calls `model.getClient()`', function () {
       const model = {
         getAccessToken: function () {},
-        getClient: sinon
-          .stub()
-          .returns({
-            grants: ['authorization_code'],
-            redirectUris: ['http://example.com/cb'],
-          }),
-        saveAuthorizationCode: function () {},
+        getClient: sinon.stub().returns({
+          grants: ['authorization_code'],
+          redirectUris: ['http://example.com/cb']
+        }),
+        saveAuthorizationCode: function () {}
       };
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { client_id: 12345, client_secret: 'secret' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return handler
         .getClient(request)
         .then(function () {
-          model.getClient.callCount.should.equal(1);
-          model.getClient.firstCall.args.should.have.length(2);
-          model.getClient.firstCall.args[0].should.equal(12345);
-          model.getClient.firstCall.thisValue.should.equal(model);
+          expect(model.getClient.callCount).to.equal(1);
+          expect(model.getClient.firstCall.args).to.have.length(2);
+          expect(model.getClient.firstCall.args[0]).to.equal(12345);
+          expect(model.getClient.firstCall.thisValue).to.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('getUser()', function () {
-    it('should call `authenticateHandler.getUser()`', function () {
+    it('calls `authenticateHandler.getUser()`', function () {
       const authenticateHandler = {
-        handle: sinon.stub().returns(Promise.resolve({})),
+        handle: sinon.stub().returns(Promise.resolve({}))
       };
       const model = {
         getClient: function () {},
-        saveAuthorizationCode: function () {},
+        saveAuthorizationCode: function () {}
       };
       const handler = new AuthorizeHandler({
         authenticateHandler: authenticateHandler,
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
       const response = new Response();
 
       return handler
         .getUser(request, response)
         .then(function () {
-          authenticateHandler.handle.callCount.should.equal(1);
-          authenticateHandler.handle.firstCall.args.should.have.length(2);
-          authenticateHandler.handle.firstCall.args[0].should.equal(request);
-          authenticateHandler.handle.firstCall.args[1].should.equal(response);
+          expect(authenticateHandler.handle.callCount).to.equal(1);
+          expect(authenticateHandler.handle.firstCall.args).to.deep.equal([
+            request,
+            response
+          ]);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('saveAuthorizationCode()', function () {
-    it('should call `model.saveAuthorizationCode()`', function () {
+    it('calls `model.saveAuthorizationCode()`', function () {
       const model = {
         getAccessToken: function () {},
         getClient: function () {},
-        saveAuthorizationCode: sinon.stub().returns({}),
+        saveAuthorizationCode: sinon.stub().returns({})
       };
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
 
       return handler
         .saveAuthorizationCode('foo', 'bar', ['qux'], 'biz', 'baz', 'boz')
         .then(function () {
-          model.saveAuthorizationCode.callCount.should.equal(1);
-          model.saveAuthorizationCode.firstCall.args.should.have.length(3);
-          model.saveAuthorizationCode.firstCall.args[0].should.eql({
-            authorizationCode: 'foo',
-            expiresAt: 'bar',
-            redirectUri: 'baz',
-            scope: ['qux'],
+          expect(model.saveAuthorizationCode.callCount).to.equal(1);
+          expect(model.saveAuthorizationCode.firstCall).to.deep.include({
+            args: [
+              {
+                authorizationCode: 'foo',
+                expiresAt: 'bar',
+                redirectUri: 'baz',
+                scope: ['qux']
+              },
+              'biz',
+              'boz'
+            ],
+            thisValue: model
           });
-          model.saveAuthorizationCode.firstCall.args[1].should.equal('biz');
-          model.saveAuthorizationCode.firstCall.args[2].should.equal('boz');
-          model.saveAuthorizationCode.firstCall.thisValue.should.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
 
-    it('should call `model.saveAuthorizationCode()` with code challenge', function () {
+    it('calls `model.saveAuthorizationCode()` with code challenge', function () {
       const model = {
         getAccessToken: function () {},
         getClient: function () {},
-        saveAuthorizationCode: sinon.stub().returns({}),
+        saveAuthorizationCode: sinon.stub().returns({})
       };
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
 
       return handler
@@ -163,71 +163,73 @@ describe('AuthorizeHandler', function () {
           'codeChallengeMethod'
         )
         .then(function () {
-          model.saveAuthorizationCode.callCount.should.equal(1);
-          model.saveAuthorizationCode.firstCall.args.should.have.length(3);
-          model.saveAuthorizationCode.firstCall.args[0].should.eql({
-            authorizationCode: 'foo',
-            expiresAt: 'bar',
-            redirectUri: 'baz',
-            scope: ['qux'],
-            codeChallenge: 'codeChallenge',
-            codeChallengeMethod: 'codeChallengeMethod',
+          expect(model.saveAuthorizationCode.callCount).to.equal(1);
+          expect(model.saveAuthorizationCode.firstCall).to.deep.include({
+            args: [
+              {
+                authorizationCode: 'foo',
+                expiresAt: 'bar',
+                redirectUri: 'baz',
+                scope: ['qux'],
+                codeChallenge: 'codeChallenge',
+                codeChallengeMethod: 'codeChallengeMethod'
+              },
+              'biz',
+              'boz'
+            ],
+            thisValue: model
           });
-          model.saveAuthorizationCode.firstCall.args[1].should.equal('biz');
-          model.saveAuthorizationCode.firstCall.args[2].should.equal('boz');
-          model.saveAuthorizationCode.firstCall.thisValue.should.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('validateRedirectUri()', function () {
-    it('should call `model.validateRedirectUri()`', function () {
+    it('calls `model.validateRedirectUri()`', function () {
       const client = {
         grants: ['authorization_code'],
-        redirectUris: ['http://example.com/cb'],
+        redirectUris: ['http://example.com/cb']
       };
       const redirect_uri = 'http://example.com/cb/2';
       const model = {
         getAccessToken: function () {},
         getClient: sinon.stub().returns(client),
         saveAuthorizationCode: function () {},
-        validateRedirectUri: sinon.stub().returns(true),
+        validateRedirectUri: sinon.stub().returns(true)
       };
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { client_id: 12345, client_secret: 'secret', redirect_uri },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return handler
         .getClient(request)
         .then(function () {
-          model.getClient.callCount.should.equal(1);
-          model.getClient.firstCall.args.should.have.length(2);
-          model.getClient.firstCall.args[0].should.equal(12345);
-          model.getClient.firstCall.thisValue.should.equal(model);
+          expect(model.getClient.callCount).to.equal(1);
+          expect(model.getClient.firstCall.args).to.have.length(2);
+          expect(model.getClient.firstCall.args[0]).to.equal(12345);
+          expect(model.getClient.firstCall.thisValue).to.equal(model);
 
-          model.validateRedirectUri.callCount.should.equal(1);
-          model.validateRedirectUri.firstCall.args.should.have.length(2);
-          model.validateRedirectUri.firstCall.args[0].should.equal(
-            redirect_uri
-          );
-          model.validateRedirectUri.firstCall.args[1].should.equal(client);
-          model.validateRedirectUri.firstCall.thisValue.should.equal(model);
+          expect(model.validateRedirectUri.callCount).to.equal(1);
+          expect(model.validateRedirectUri.firstCall.args).to.deep.equal([
+            redirect_uri,
+            client
+          ]);
+          expect(model.validateRedirectUri.firstCall.thisValue).to.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
 
-    it('should be successful validation', function () {
+    it('validates', function () {
       const client = {
         grants: ['authorization_code'],
-        redirectUris: ['http://example.com/cb'],
+        redirectUris: ['http://example.com/cb']
       };
       const redirect_uri = 'http://example.com/cb';
       const model = {
@@ -236,29 +238,29 @@ describe('AuthorizeHandler', function () {
         saveAuthorizationCode: function () {},
         validateRedirectUri: function (redirectUri, client) {
           return client.redirectUris.includes(redirectUri);
-        },
+        }
       };
 
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { client_id: 12345, client_secret: 'secret', redirect_uri },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return handler.getClient(request).then((client) => {
-        client.should.equal(client);
+        expect(client).to.equal(client);
       });
     });
 
-    it('should be unsuccessful validation', function () {
+    it('does not validate', function () {
       const client = {
         grants: ['authorization_code'],
-        redirectUris: ['http://example.com/cb'],
+        redirectUris: ['http://example.com/cb']
       };
       const redirect_uri = 'http://example.com/callback';
       const model = {
@@ -267,30 +269,31 @@ describe('AuthorizeHandler', function () {
         saveAuthorizationCode: function () {},
         validateRedirectUri: function (redirectUri, client) {
           return client.redirectUris.includes(redirectUri);
-        },
+        }
       };
 
       const handler = new AuthorizeHandler({
         authorizationCodeLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { client_id: 12345, client_secret: 'secret', redirect_uri },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return handler
         .getClient(request)
         .then(() => {
-          throw Error('should not resolve');
+          throw Error('must not resolve');
         })
         .catch((err) => {
-          err.name.should.equal('invalid_client');
-          err.message.should.equal(
-            'Invalid client: `redirect_uri` does not match client value'
-          );
+          expect(err).to.deep.include({
+            name: 'invalid_client',
+            message:
+              'Invalid client: `redirect_uri` does not match client value'
+          });
         });
     });
   });

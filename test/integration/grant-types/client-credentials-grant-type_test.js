@@ -8,8 +8,7 @@ import ClientCredentialsGrantType from '../../../lib/grant-types/client-credenti
 import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
 import InvalidGrantError from '../../../lib/errors/invalid-grant-error.js';
 import Request from '../../../lib/request.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `ClientCredentialsGrantType` integration.
@@ -17,42 +16,42 @@ const should = Chai.should();
 
 describe('ClientCredentialsGrantType integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `model` is missing', function () {
+    it('throws an error if `model` is missing', function () {
       try {
         new ClientCredentialsGrantType();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `model`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `model`');
       }
     });
 
-    it('should throw an error if the model does not implement `getUserFromClient()`', function () {
+    it('throws an error if the model does not implement `getUserFromClient()`', function () {
       try {
         new ClientCredentialsGrantType({ model: {} });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal(
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal(
           'Invalid argument: model does not implement `getUserFromClient()`'
         );
       }
     });
 
-    it('should throw an error if the model does not implement `saveToken()`', function () {
+    it('throws an error if the model does not implement `saveToken()`', function () {
       try {
         const model = {
-          getUserFromClient: function () {},
+          getUserFromClient: function () {}
         };
 
         new ClientCredentialsGrantType({ model: model });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal(
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal(
           'Invalid argument: model does not implement `saveToken()`'
         );
       }
@@ -60,53 +59,53 @@ describe('ClientCredentialsGrantType integration', function () {
   });
 
   describe('handle()', function () {
-    it('should throw an error if `request` is missing', async function () {
+    it('throws an error if `request` is missing', async function () {
       const model = {
         getUserFromClient: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
 
       try {
         await grantType.handle();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `request`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `request`');
       }
     });
 
-    it('should throw an error if `client` is missing', async function () {
+    it('throws an error if `client` is missing', async function () {
       const model = {
         getUserFromClient: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       try {
         await grantType.handle(request);
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `client`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `client`');
       }
     });
 
-    it('should return a token', async function () {
+    it('returns a token', async function () {
       const token = {};
       const client = { foo: 'bar' };
       const user = { name: 'foo' };
@@ -114,46 +113,46 @@ describe('ClientCredentialsGrantType integration', function () {
 
       const model = {
         getUserFromClient: async function (_client) {
-          _client.should.deep.equal(client);
+          expect(_client).to.deep.equal(client);
           return { ...user };
         },
         saveToken: async function (_token, _client, _user) {
-          _client.should.deep.equal(client);
-          _user.should.deep.equal(user);
-          _token.accessToken.should.equal('long-access-token-hash');
-          _token.accessTokenExpiresAt.should.be.instanceOf(Date);
-          _token.scope.should.eql(scope);
+          expect(_client).to.deep.equal(client);
+          expect(_user).to.deep.equal(user);
+          expect(_token.accessToken).to.equal('long-access-token-hash');
+          expect(_token.accessTokenExpiresAt).to.be.instanceOf(Date);
+          expect(_token.scope).to.eql(scope);
           return token;
         },
         validateScope: async function (_user, _client, _scope) {
-          _user.should.deep.equal(user);
-          _client.should.deep.equal(client);
-          _scope.should.eql(scope);
+          expect(_user).to.deep.equal(user);
+          expect(_client).to.deep.equal(client);
+          expect(_scope).to.eql(scope);
           return scope;
         },
         generateAccessToken: async function (_client, _user, _scope) {
-          _user.should.deep.equal(user);
-          _client.should.deep.equal(client);
-          _scope.should.eql(scope);
+          expect(_user).to.deep.equal(user);
+          expect(_client).to.deep.equal(client);
+          expect(_scope).to.eql(scope);
           return 'long-access-token-hash';
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { scope: scope.join(' ') },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       const data = await grantType.handle(request, client);
-      data.should.equal(token);
+      expect(data).to.equal(token);
     });
 
-    it('should support promises', function () {
+    it('supports promises', function () {
       const token = {};
       const model = {
         getUserFromClient: async function () {
@@ -161,23 +160,23 @@ describe('ClientCredentialsGrantType integration', function () {
         },
         saveToken: async function () {
           return token;
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      grantType.handle(request, {}).should.be.an.instanceOf(Promise);
+      expect(grantType.handle(request, {})).to.be.an.instanceOf(Promise);
     });
 
-    it('should support non-promises', function () {
+    it('supports non-promises', function () {
       const token = {};
       const model = {
         getUserFromClient: function () {
@@ -185,171 +184,177 @@ describe('ClientCredentialsGrantType integration', function () {
         },
         saveToken: function () {
           return token;
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      grantType.handle(request, {}).should.be.an.instanceOf(Promise);
+      expect(grantType.handle(request, {})).to.be.an.instanceOf(Promise);
     });
   });
 
   describe('getUserFromClient()', function () {
-    it('should throw an error if `user` is missing', function () {
+    it('throws an error if `user` is missing', function () {
       const model = {
         getUserFromClient: function () {},
-        saveToken: () => should.fail(),
+        saveToken: () => expect.fail()
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getUserFromClient(request, {})
-        .then(should.fail)
+        .then(expect.fail)
         .catch(function (e) {
-          e.should.be.an.instanceOf(InvalidGrantError);
-          e.message.should.equal('Invalid grant: user credentials are invalid');
+          expect(e).to.be.an.instanceOf(InvalidGrantError);
+          expect(e.message).to.equal(
+            'Invalid grant: user credentials are invalid'
+          );
         });
     });
 
-    it('should return a user', function () {
+    it('returns a user', function () {
       const user = { email: 'foo@bar.com' };
       const model = {
         getUserFromClient: function () {
           return user;
         },
-        saveToken: () => should.fail(),
+        saveToken: () => expect.fail()
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getUserFromClient(request, {})
         .then(function (data) {
-          data.should.equal(user);
+          expect(data).to.equal(user);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
 
-    it('should support promises', function () {
+    it('supports promises', function () {
       const user = { email: 'foo@bar.com' };
       const model = {
         getUserFromClient: async function () {
           return user;
         },
-        saveToken: () => should.fail(),
+        saveToken: () => expect.fail()
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      grantType.getUserFromClient(request, {}).should.be.an.instanceOf(Promise);
+      expect(grantType.getUserFromClient(request, {})).to.be.an.instanceOf(
+        Promise
+      );
     });
 
-    it('should support non-promises', function () {
+    it('supports non-promises', function () {
       const user = { email: 'foo@bar.com' };
       const model = {
         getUserFromClient: function () {
           return user;
         },
-        saveToken: () => should.fail(),
+        saveToken: () => expect.fail()
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      grantType.getUserFromClient(request, {}).should.be.an.instanceOf(Promise);
+      expect(grantType.getUserFromClient(request, {})).to.be.an.instanceOf(
+        Promise
+      );
     });
   });
 
   describe('saveToken()', function () {
-    it('should save the token', async function () {
+    it('saves the token', async function () {
       const token = {};
       const model = {
-        getUserFromClient: () => should.fail(),
+        getUserFromClient: () => expect.fail(),
         saveToken: function () {
           return token;
         },
         validateScope: function () {
           return ['foo'];
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const data = await grantType.saveToken(token);
-      data.should.equal(token);
+      expect(data).to.equal(token);
     });
 
-    it('should support promises', function () {
+    it('supports promises', function () {
       const token = {};
       const model = {
-        getUserFromClient: () => should.fail(),
+        getUserFromClient: () => expect.fail(),
         saveToken: async function () {
           return token;
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
 
-      grantType.saveToken(token).should.be.an.instanceOf(Promise);
+      expect(grantType.saveToken(token)).to.be.an.instanceOf(Promise);
     });
 
-    it('should support non-promises', function () {
+    it('supports non-promises', function () {
       const token = {};
       const model = {
-        getUserFromClient: () => should.fail(),
+        getUserFromClient: () => expect.fail(),
         saveToken: function () {
           return token;
-        },
+        }
       };
       const grantType = new ClientCredentialsGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
 
-      grantType.saveToken(token).should.be.an.instanceOf(Promise);
+      expect(grantType.saveToken(token)).to.be.an.instanceOf(Promise);
     });
   });
 });

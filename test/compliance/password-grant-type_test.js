@@ -61,14 +61,12 @@ import createModel from '../helpers/model.js';
 import createRequest from '../helpers/request.js';
 import Response from '../../lib/response.js';
 import crypto from 'node:crypto';
-
-import Chai from 'chai';
-Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 const db = new DB();
 
 const auth = new OAuth2Server({
-  model: createModel(db),
+  model: createModel(db)
 });
 
 const user = db.saveUser({ id: 1, username: 'test', password: 'test' });
@@ -81,15 +79,15 @@ function createDefaultRequest() {
       grant_type: 'password',
       username: user.username,
       password: user.password,
-      scope,
+      scope
     },
     headers: {
       authorization:
         'Basic ' +
         Buffer.from(client.id + ':' + client.secret).toString('base64'),
-      'content-type': 'application/x-www-form-urlencoded',
+      'content-type': 'application/x-www-form-urlencoded'
     },
-    method: 'POST',
+    method: 'POST'
   });
 }
 
@@ -100,20 +98,20 @@ describe('PasswordGrantType Compliance', function () {
       const response = new Response({});
 
       const token = await auth.token(request, response, {});
-      response.body.token_type.should.equal('Bearer');
-      response.body.access_token.should.equal(token.accessToken);
-      response.body.refresh_token.should.equal(token.refreshToken);
-      response.body.expires_in.should.be.a('number');
-      response.body.scope.should.eql('read write');
+      expect(response.body.token_type).to.equal('Bearer');
+      expect(response.body.access_token).to.equal(token.accessToken);
+      expect(response.body.refresh_token).to.equal(token.refreshToken);
+      expect(response.body.expires_in).to.be.a('number');
+      expect(response.body.scope).to.eql('read write');
 
-      token.accessToken.should.be.a('string');
-      token.refreshToken.should.be.a('string');
-      token.accessTokenExpiresAt.should.be.a('date');
-      token.refreshTokenExpiresAt.should.be.a('date');
-      token.scope.should.eql(['read', 'write']);
+      expect(token.accessToken).to.be.a('string');
+      expect(token.refreshToken).to.be.a('string');
+      expect(token.accessTokenExpiresAt).to.be.a('date');
+      expect(token.refreshTokenExpiresAt).to.be.a('date');
+      expect(token.scope).to.eql(['read', 'write']);
 
-      db.accessTokens.has(token.accessToken).should.equal(true);
-      db.refreshTokens.has(token.refreshToken).should.equal(true);
+      expect(db.accessTokens.has(token.accessToken)).to.equal(true);
+      expect(db.refreshTokens.has(token.refreshToken)).to.equal(true);
     });
 
     it('Succesfull authorization and authentication', async function () {
@@ -125,10 +123,10 @@ describe('PasswordGrantType Compliance', function () {
       const authenticationRequest = createRequest({
         body: {},
         headers: {
-          Authorization: `Bearer ${token.accessToken}`,
+          Authorization: `Bearer ${token.accessToken}`
         },
         method: 'GET',
-        query: {},
+        query: {}
       });
       const authenticationResponse = new Response({});
 
@@ -138,9 +136,9 @@ describe('PasswordGrantType Compliance', function () {
         {}
       );
 
-      authenticated.scope.should.eql(['read', 'write']);
-      authenticated.user.should.be.an('object');
-      authenticated.client.should.be.an('object');
+      expect(authenticated.scope).to.eql(['read', 'write']);
+      expect(authenticated.user).to.be.an('object');
+      expect(authenticated.client).to.be.an('object');
     });
 
     it('Username missing', async function () {
@@ -150,7 +148,7 @@ describe('PasswordGrantType Compliance', function () {
       delete request.body.username;
 
       await auth.token(request, response, {}).catch((err) => {
-        err.name.should.equal('invalid_request');
+        expect(err.name).to.equal('invalid_request');
       });
     });
 
@@ -161,7 +159,7 @@ describe('PasswordGrantType Compliance', function () {
       delete request.body.password;
 
       await auth.token(request, response, {}).catch((err) => {
-        err.name.should.equal('invalid_request');
+        expect(err.name).to.equal('invalid_request');
       });
     });
 
@@ -172,7 +170,7 @@ describe('PasswordGrantType Compliance', function () {
       request.body.username = 'wrong';
 
       await auth.token(request, response, {}).catch((err) => {
-        err.name.should.equal('invalid_grant');
+        expect(err.name).to.equal('invalid_grant');
       });
     });
 
@@ -183,7 +181,7 @@ describe('PasswordGrantType Compliance', function () {
       request.body.password = 'wrong';
 
       await auth.token(request, response, {}).catch((err) => {
-        err.name.should.equal('invalid_grant');
+        expect(err.name).to.equal('invalid_grant');
       });
     });
 
@@ -199,7 +197,7 @@ describe('PasswordGrantType Compliance', function () {
         Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
       await auth.token(request, response, {}).catch((err) => {
-        err.name.should.equal('invalid_client');
+        expect(err.name).to.equal('invalid_client');
       });
     });
 
@@ -211,11 +209,11 @@ describe('PasswordGrantType Compliance', function () {
 
       const token = await auth.token(request, response, {
         requireClientAuthentication: {
-          password: false,
-        },
+          password: false
+        }
       });
 
-      token.accessToken.should.be.a('string');
+      expect(token.accessToken).to.be.a('string');
     });
 
     it('Client secret required', async function () {
@@ -227,11 +225,11 @@ describe('PasswordGrantType Compliance', function () {
       await auth
         .token(request, response, {
           requireClientAuthentication: {
-            password: false,
-          },
+            password: false
+          }
         })
         .catch((err) => {
-          err.name.should.equal('invalid_client');
+          expect(err.name).to.equal('invalid_client');
         });
     });
   });

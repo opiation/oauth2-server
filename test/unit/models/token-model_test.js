@@ -1,7 +1,7 @@
 import TokenModel from '../../../lib/models/token-model.js';
 import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../../test-utils.js';
+
 /**
  * Test `Server`.
  */
@@ -11,12 +11,13 @@ describe('Model', function () {
     it('throws, if data is empty', function () {
       try {
         new TokenModel();
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `accessToken`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `accessToken`');
       }
     });
+
     it('throws, if `accessToken` is missing', function () {
       const atExpiresAt = new Date();
       atExpiresAt.setHours(new Date().getHours() + 1);
@@ -24,17 +25,18 @@ describe('Model', function () {
       const data = {
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt,
+        accessTokenExpiresAt: atExpiresAt
       };
 
       try {
         new TokenModel(data);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `accessToken`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `accessToken`');
       }
     });
+
     it('throws, if `client` is missing', function () {
       const atExpiresAt = new Date();
       atExpiresAt.setHours(new Date().getHours() + 1);
@@ -42,17 +44,18 @@ describe('Model', function () {
       const data = {
         accessToken: 'foo',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt,
+        accessTokenExpiresAt: atExpiresAt
       };
 
       try {
         new TokenModel(data);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `client`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `client`');
       }
     });
+
     it('throws, if `user` is missing', function () {
       const atExpiresAt = new Date();
       atExpiresAt.setHours(new Date().getHours() + 1);
@@ -60,50 +63,55 @@ describe('Model', function () {
       const data = {
         accessToken: 'foo',
         client: 'bar',
-        accessTokenExpiresAt: atExpiresAt,
+        accessTokenExpiresAt: atExpiresAt
       };
 
       try {
         new TokenModel(data);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `user`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `user`');
       }
     });
+
     it('throws, if `accessTokenExpiresAt` is not a Date', function () {
       const data = {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: '11/10/2023',
+        accessTokenExpiresAt: '11/10/2023'
       };
 
       try {
         new TokenModel(data);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Invalid parameter: `accessTokenExpiresAt`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Invalid parameter: `accessTokenExpiresAt`');
       }
     });
+
     it('throws, if `refreshTokenExpiresAt` is not a Date', function () {
       const data = {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        refreshTokenExpiresAt: '11/10/2023',
+        refreshTokenExpiresAt: '11/10/2023'
       };
 
       try {
         new TokenModel(data);
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Invalid parameter: `refreshTokenExpiresAt`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal(
+          'Invalid parameter: `refreshTokenExpiresAt`'
+        );
       }
     });
-    it('should calculate `accessTokenLifetime` if `accessTokenExpiresAt` is set', function () {
+
+    it('calculates `accessTokenLifetime` if `accessTokenExpiresAt` is set', function () {
       const atExpiresAt = new Date();
       atExpiresAt.setHours(new Date().getHours() + 1);
 
@@ -111,49 +119,49 @@ describe('Model', function () {
         accessToken: 'foo',
         client: 'bar',
         user: 'tar',
-        accessTokenExpiresAt: atExpiresAt,
+        accessTokenExpiresAt: atExpiresAt
       };
 
       const model = new TokenModel(data);
-      should.exist(model.accessTokenLifetime);
-      model.accessTokenLifetime.should.a('number');
-      model.accessTokenLifetime.should.be.approximately(3600, 2);
+      expect(model.accessTokenLifetime).to.exist;
+      expect(model.accessTokenLifetime).to.be.a('number');
+      expect(model.accessTokenLifetime).to.be.approximately(3600, 2);
     });
 
-    it('should throw if the required arguments are not provided', () => {
-      should.throw(() => {
+    it('throws if the required arguments are not provided', () => {
+      expect(() => {
         new TokenModel({});
-      });
+      }).to.throw();
     });
 
-    it('should ignore custom attributes if allowExtendedTokenAttributes is not specified as true', () => {
+    it('ignores custom attributes if allowExtendedTokenAttributes is not specified as true', () => {
       const model = new TokenModel({
         accessToken: 'token',
         client: 'client',
         user: 'user',
-        myCustomAttribute: 'myCustomValue',
+        myCustomAttribute: 'myCustomValue'
       });
 
-      should.not.exist(model['myCustomAttribute']);
-      should.not.exist(model['customAttributes']);
+      expect(model['myCustomAttribute']).not.to.exist;
+      expect(model['customAttributes']).not.to.exist;
     });
 
-    it('should set custom attributes on the customAttributes field if allowExtendedTokenAttributes is specified as true', () => {
+    it('sets custom attributes on the customAttributes field if allowExtendedTokenAttributes is specified as true', () => {
       const model = new TokenModel(
         {
           accessToken: 'token',
           client: 'client',
           user: 'user',
-          myCustomAttribute: 'myCustomValue',
+          myCustomAttribute: 'myCustomValue'
         },
         {
-          allowExtendedTokenAttributes: true,
+          allowExtendedTokenAttributes: true
         }
       );
 
-      should.not.exist(model['myCustomAttribute']);
-      model['customAttributes'].should.be.an('object');
-      model['customAttributes']['myCustomAttribute'].should.equal(
+      expect(model['myCustomAttribute']).not.to.exist;
+      expect(model['customAttributes']).to.be.an('object');
+      expect(model['customAttributes']['myCustomAttribute']).to.equal(
         'myCustomValue'
       );
     });

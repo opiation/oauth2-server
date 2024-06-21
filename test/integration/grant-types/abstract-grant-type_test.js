@@ -8,8 +8,7 @@ import AbstractGrantType from '../../../lib/grant-types/abstract-grant-type.js';
 import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
 import Request from '../../../lib/request.js';
 import InvalidScopeError from '../../../lib/errors/invalid-scope-error.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `AbstractGrantType` integration.
@@ -17,220 +16,220 @@ const should = Chai.should();
 
 describe('AbstractGrantType integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `options.accessTokenLifetime` is missing', function () {
+    it('throws an error if `options.accessTokenLifetime` is missing', function () {
       try {
         new AbstractGrantType();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `accessTokenLifetime`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `accessTokenLifetime`');
       }
     });
 
-    it('should throw an error if `options.model` is missing', function () {
+    it('throws an error if `options.model` is missing', function () {
       try {
         new AbstractGrantType({ accessTokenLifetime: 123 });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `model`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `model`');
       }
     });
 
-    it('should set the `accessTokenLifetime`', function () {
+    it('sets the `accessTokenLifetime`', function () {
       const grantType = new AbstractGrantType({
         accessTokenLifetime: 123,
-        model: {},
+        model: {}
       });
 
-      grantType.accessTokenLifetime.should.equal(123);
+      expect(grantType.accessTokenLifetime).to.equal(123);
     });
 
-    it('should set the `model`', function () {
+    it('sets the `model`', function () {
       const model = { async generateAccessToken() {} };
       const grantType = new AbstractGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
 
-      grantType.model.should.equal(model);
+      expect(grantType.model).to.equal(model);
     });
 
-    it('should set the `refreshTokenLifetime`', function () {
+    it('sets the `refreshTokenLifetime`', function () {
       const grantType = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
 
-      grantType.refreshTokenLifetime.should.equal(456);
+      expect(grantType.refreshTokenLifetime).to.equal(456);
     });
   });
 
   describe('generateAccessToken()', function () {
-    it('should return an access token', async function () {
+    it('returns an access token', async function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const accessToken = await handler.generateAccessToken();
-      accessToken.should.be.a.sha256();
+      expect(accessToken).to.be.a.sha256();
     });
 
-    it('should support promises', async function () {
+    it('supports promises', async function () {
       const model = {
         generateAccessToken: async function () {
           return 'long-hash-foo-bar';
-        },
+        }
       };
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: model,
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const accessToken = await handler.generateAccessToken();
-      accessToken.should.equal('long-hash-foo-bar');
+      expect(accessToken).to.equal('long-hash-foo-bar');
     });
 
-    it('should support non-promises', async function () {
+    it('supports non-promises', async function () {
       const model = {
         generateAccessToken: function () {
           return 'long-hash-foo-bar';
-        },
+        }
       };
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: model,
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const accessToken = await handler.generateAccessToken();
-      accessToken.should.equal('long-hash-foo-bar');
+      expect(accessToken).to.equal('long-hash-foo-bar');
     });
   });
 
   describe('generateRefreshToken()', function () {
-    it('should return a refresh token', async function () {
+    it('returns a refresh token', async function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const refreshToken = await handler.generateRefreshToken();
-      refreshToken.should.be.a.sha256();
+      expect(refreshToken).to.be.a.sha256();
     });
 
-    it('should support promises', async function () {
+    it('supports promises', async function () {
       const model = {
         generateRefreshToken: async function () {
           return 'long-hash-foo-bar';
-        },
+        }
       };
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: model,
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const refreshToken = await handler.generateRefreshToken();
-      refreshToken.should.equal('long-hash-foo-bar');
+      expect(refreshToken).to.equal('long-hash-foo-bar');
     });
 
-    it('should support non-promises', async function () {
+    it('supports non-promises', async function () {
       const model = {
         generateRefreshToken: function () {
           return 'long-hash-foo-bar';
-        },
+        }
       };
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: model,
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const refreshToken = await handler.generateRefreshToken();
-      refreshToken.should.equal('long-hash-foo-bar');
+      expect(refreshToken).to.equal('long-hash-foo-bar');
     });
   });
 
   describe('getAccessTokenExpiresAt()', function () {
-    it('should return a date', function () {
+    it('returns a date', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
 
-      handler.getAccessTokenExpiresAt().should.be.an.instanceOf(Date);
+      expect(handler.getAccessTokenExpiresAt()).to.be.an.instanceOf(Date);
     });
   });
 
   describe('getRefreshTokenExpiresAt()', function () {
-    it('should return a refresh token', function () {
+    it('returns a refresh token', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
 
-      handler.getRefreshTokenExpiresAt().should.be.an.instanceOf(Date);
+      expect(handler.getRefreshTokenExpiresAt()).to.be.an.instanceOf(Date);
     });
   });
 
   describe('getScope()', function () {
-    it('should throw an error if `scope` is invalid', function () {
+    it('throws an error if `scope` is invalid', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const request = new Request({
         body: { scope: 'øå€£‰' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       try {
         handler.getScope(request);
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidScopeError);
-        e.message.should.equal('Invalid parameter: `scope`');
+        expect(e).to.be.an.instanceOf(InvalidScopeError);
+        expect(e.message).to.equal('Invalid parameter: `scope`');
       }
     });
 
-    it('should allow the `scope` to be `undefined`', function () {
+    it('allows the `scope` to be `undefined`', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      should.not.exist(handler.getScope(request));
+      expect(handler.getScope(request)).to.not.exist;
     });
 
-    it('should return the scope', function () {
+    it('returns the scope', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const request = new Request({
         body: { scope: 'foo' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      handler.getScope(request).should.eql(['foo']);
+      expect(handler.getScope(request)).to.eql(['foo']);
     });
   });
 
@@ -242,10 +241,10 @@ describe('AbstractGrantType integration', function () {
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model: {},
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const validated = await handler.validateScope(user, client, scope);
-      validated.should.eql(scope);
+      expect(validated).to.eql(scope);
     });
 
     it('accepts the scope, if the model accepts it', async function () {
@@ -256,20 +255,20 @@ describe('AbstractGrantType integration', function () {
       const model = {
         async validateScope(_user, _client, _scope) {
           // make sure the model received the correct args
-          _user.should.deep.equal(user);
-          _client.should.deep.equal(_client);
-          _scope.should.eql(scope);
+          expect(_user).to.deep.equal(user);
+          expect(_client).to.deep.equal(_client);
+          expect(_scope).to.eql(scope);
 
           return scope;
-        },
+        }
       };
       const handler = new AbstractGrantType({
         accessTokenLifetime: 123,
         model,
-        refreshTokenLifetime: 456,
+        refreshTokenLifetime: 456
       });
       const validated = await handler.validateScope(user, client, scope);
-      validated.should.eql(scope);
+      expect(validated).to.eql(scope);
     });
 
     it('throws if the model rejects the scope', async function () {
@@ -282,25 +281,27 @@ describe('AbstractGrantType integration', function () {
         const model = {
           async validateScope(_user, _client, _scope) {
             // make sure the model received the correct args
-            _user.should.deep.equal(user);
-            _client.should.deep.equal(_client);
-            _scope.should.eql(scope);
+            expect(_user).to.deep.equal(user);
+            expect(_client).to.deep.equal(_client);
+            expect(_scope).to.eql(scope);
 
             return type;
-          },
+          }
         };
         const handler = new AbstractGrantType({
           accessTokenLifetime: 123,
           model,
-          refreshTokenLifetime: 456,
+          refreshTokenLifetime: 456
         });
 
         try {
           await handler.validateScope(user, client, scope);
-          should.fail();
+          expect.fail();
         } catch (e) {
-          e.should.be.an.instanceOf(InvalidScopeError);
-          e.message.should.equal('Invalid scope: Requested scope is invalid');
+          expect(e).to.be.an.instanceOf(InvalidScopeError);
+          expect(e.message).to.equal(
+            'Invalid scope: Requested scope is invalid'
+          );
         }
       }
     });

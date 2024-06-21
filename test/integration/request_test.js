@@ -6,8 +6,7 @@
 
 import Request from '../../lib/request.js';
 import InvalidArgumentError from '../../lib/errors/invalid-argument-error.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 /**
  * Test `Request` integration.
@@ -15,176 +14,176 @@ const should = Chai.should();
 
 describe('Request integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `headers` is missing', function () {
+    it('throws an error if `headers` is missing', function () {
       try {
         new Request({ body: {} });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `headers`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `headers`');
       }
     });
 
-    it('should throw an error if `method` is missing', function () {
+    it('throws an error if `method` is missing', function () {
       try {
         new Request({ body: {}, headers: {} });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `method`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `method`');
       }
     });
 
-    it('should throw an error if `query` is missing', function () {
+    it('throws an error if `query` is missing', function () {
       try {
         new Request({ body: {}, headers: {}, method: {} });
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `query`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `query`');
       }
     });
 
-    it('should set the `body`', function () {
+    it('sets the `body`', function () {
       const request = new Request({
         body: 'foo',
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.body.should.equal('foo');
+      expect(request.body).to.equal('foo');
     });
 
-    it('should set the `headers`', function () {
+    it('sets the `headers`', function () {
       const request = new Request({
         body: {},
         headers: { foo: 'bar', QuX: 'biz' },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.headers.should.eql({ foo: 'bar', qux: 'biz' });
+      expect(request.headers).to.eql({ foo: 'bar', qux: 'biz' });
     });
 
-    it('should set the `method`', function () {
+    it('sets the `method`', function () {
       const request = new Request({
         body: {},
         headers: {},
         method: 'biz',
-        query: {},
+        query: {}
       });
 
-      request.method.should.equal('biz');
+      expect(request.method).to.equal('biz');
     });
 
-    it('should set the `query`', function () {
+    it('sets the `query`', function () {
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: 'baz',
+        query: 'baz'
       });
 
-      request.query.should.equal('baz');
+      expect(request.query).to.equal('baz');
     });
   });
 
   describe('get()', function () {
-    it('should return `undefined` if the field does not exist', function () {
+    it('returns `undefined` if the field does not exist', function () {
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      (undefined === request.get('content-type')).should.be.true;
+      expect(request.get('content-type')).to.be.undefined;
     });
 
-    it('should return the value if the field exists', function () {
+    it('returns the value if the field exists', function () {
       const request = new Request({
         body: {},
         headers: {
-          'content-type': 'text/html; charset=utf-8',
+          'content-type': 'text/html; charset=utf-8'
         },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.get('Content-Type').should.equal('text/html; charset=utf-8');
+      expect(request.get('Content-Type')).to.equal('text/html; charset=utf-8');
     });
   });
 
   describe('is()', function () {
-    it('should accept an array of `types`', function () {
+    it('accepts an array of `types`', function () {
       const request = new Request({
         body: {},
         headers: {
           'content-type': 'application/json',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.is(['html', 'json']).should.equal('json');
+      expect(request.is(['html', 'json'])).to.equal('json');
     });
 
-    it('should accept multiple `types` as arguments', function () {
+    it('accepts multiple `types` as arguments', function () {
       const request = new Request({
         body: {},
         headers: {
           'content-type': 'application/json',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.is('html', 'json').should.equal('json');
+      expect(request.is('html', 'json')).to.equal('json');
     });
 
-    it('should return the first matching type', function () {
+    it('returns the first matching type', function () {
       const request = new Request({
         body: {},
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.is('html').should.equal('html');
+      expect(request.is('html')).to.equal('html');
     });
 
-    it('should return `false` if none of the `types` match', function () {
+    it('returns `false` if none of the `types` match', function () {
       const request = new Request({
         body: {},
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.is('json').should.be.false;
+      expect(request.is('json')).to.be.false;
     });
 
-    it('should return `false` if the request has no body', function () {
+    it('returns `false` if the request has no body', function () {
       const request = new Request({
         body: {},
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
-      request.is('text/html').should.be.false;
+      expect(request.is('text/html')).to.be.false;
     });
   });
 });

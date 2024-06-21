@@ -8,7 +8,7 @@ import AuthenticateHandler from '../../lib/handlers/authenticate-handler.js';
 import AuthorizeHandler from '../../lib/handlers/authorize-handler.js';
 import Server from '../../lib/server.js';
 import TokenHandler from '../../lib/handlers/token-handler.js';
-import sinon from 'sinon';
+import { describe, expect, it, sinon } from '../test-utils.js';
 
 /**
  * Test `Server`.
@@ -16,9 +16,9 @@ import sinon from 'sinon';
 
 describe('Server', function () {
   describe('authenticate()', function () {
-    it('should call `handle`', function () {
+    it('calls `handle`', function () {
       const model = {
-        getAccessToken: function () {},
+        getAccessToken: function () {}
       };
       const server = new Server({ model: model });
 
@@ -28,8 +28,8 @@ describe('Server', function () {
 
       server.authenticate('foo');
 
-      AuthenticateHandler.prototype.handle.callCount.should.equal(1);
-      AuthenticateHandler.prototype.handle.firstCall.args[0].should.equal(
+      expect(AuthenticateHandler.prototype.handle.callCount).to.equal(1);
+      expect(AuthenticateHandler.prototype.handle.firstCall.args[0]).to.equal(
         'foo'
       );
       AuthenticateHandler.prototype.handle.restore();
@@ -37,11 +37,11 @@ describe('Server', function () {
   });
 
   describe('authorize()', function () {
-    it('should call `handle`', function () {
+    it('calls `handle`', function () {
       const model = {
         getAccessToken: function () {},
         getClient: function () {},
-        saveAuthorizationCode: function () {},
+        saveAuthorizationCode: function () {}
       };
       const server = new Server({ model: model });
 
@@ -51,17 +51,19 @@ describe('Server', function () {
 
       server.authorize('foo', 'bar');
 
-      AuthorizeHandler.prototype.handle.callCount.should.equal(1);
-      AuthorizeHandler.prototype.handle.firstCall.args[0].should.equal('foo');
+      expect(AuthorizeHandler.prototype.handle.callCount).to.equal(1);
+      expect(AuthorizeHandler.prototype.handle.firstCall.args[0]).to.equal(
+        'foo'
+      );
       AuthorizeHandler.prototype.handle.restore();
     });
   });
 
   describe('token()', function () {
-    it('should call `handle`', function () {
+    it('calls `handle`', function () {
       const model = {
         getClient: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const server = new Server({ model: model });
 
@@ -69,8 +71,8 @@ describe('Server', function () {
 
       server.token('foo', 'bar');
 
-      TokenHandler.prototype.handle.callCount.should.equal(1);
-      TokenHandler.prototype.handle.firstCall.args[0].should.equal('foo');
+      expect(TokenHandler.prototype.handle.callCount).to.equal(1);
+      expect(TokenHandler.prototype.handle.firstCall.args[0]).to.equal('foo');
       TokenHandler.prototype.handle.restore();
     });
   });

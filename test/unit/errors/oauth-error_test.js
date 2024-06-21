@@ -4,10 +4,8 @@
  * Module dependencies.
  */
 
-import { describe, it } from 'mocha';
-import Chai from 'chai';
-const should = Chai.should();
 import OAuthError from '../../../lib/errors/oauth-error.js';
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `OAuthError`.
@@ -15,7 +13,7 @@ import OAuthError from '../../../lib/errors/oauth-error.js';
 
 describe('OAuthError', function () {
   describe('constructor()', function () {
-    it('should get `captureStackTrace`', function () {
+    it('gets `captureStackTrace`', function () {
       const errorFn = function () {
         throw new OAuthError('test', { name: 'test_error', foo: 'bar' });
       };
@@ -23,20 +21,21 @@ describe('OAuthError', function () {
       try {
         errorFn();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(OAuthError);
-        e.name.should.equal('test_error');
-        e.foo.should.equal('bar');
-        e.message.should.equal('test');
-        e.code.should.equal(500);
-        e.stack.should.not.be.null;
-        e.stack.should.not.be.undefined;
-        e.stack.should.include('oauth-error_test.js');
-        e.stack.should.include('20'); //error lineNUmber
+        expect(e).to.be.an.instanceOf(OAuthError);
+        expect(e.name).to.equal('test_error');
+        expect(e.foo).to.equal('bar');
+        expect(e.message).to.equal('test');
+        expect(e.code).to.equal(500);
+        expect(e.stack).to.not.be.null;
+        expect(e.stack).to.not.be.undefined;
+        expect(e.stack).to.include('oauth-error_test.js');
+        expect(e.stack).to.include('18'); //error lineNUmber
       }
     });
   });
+
   it('supports undefined properties', function () {
     const errorFn = function () {
       throw new OAuthError('test');
@@ -45,16 +44,16 @@ describe('OAuthError', function () {
     try {
       errorFn();
 
-      should.fail();
+      expect.fail();
     } catch (e) {
-      e.should.be.an.instanceOf(OAuthError);
-      e.name.should.equal('Error');
-      e.message.should.equal('test');
-      e.code.should.equal(500);
-      e.stack.should.not.be.null;
-      e.stack.should.not.be.undefined;
-      e.stack.should.include('oauth-error_test.js');
-      e.stack.should.include('42'); //error lineNUmber
+      expect(e).to.be.an.instanceOf(OAuthError);
+      expect(e.name).to.equal('Error');
+      expect(e.message).to.equal('test');
+      expect(e.code).to.equal(500);
+      expect(e.stack).to.not.be.null;
+      expect(e.stack).to.not.be.undefined;
+      expect(e.stack).to.include('oauth-error_test.js');
+      expect(e.stack).to.include('41'); //error lineNUmber
     }
   });
 });

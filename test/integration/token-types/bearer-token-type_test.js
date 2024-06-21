@@ -6,8 +6,7 @@
 
 import BearerTokenType from '../../../lib/token-types/bearer-token-type.js';
 import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `BearerTokenType` integration.
@@ -15,79 +14,75 @@ const should = Chai.should();
 
 describe('BearerTokenType integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `accessToken` is missing', function () {
+    it('throws an error if `accessToken` is missing', function () {
       try {
         new BearerTokenType();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `accessToken`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `accessToken`');
       }
     });
 
-    it('should set the `accessToken`', function () {
+    it('sets the `accessToken`', function () {
       const responseType = new BearerTokenType('foo', 'bar');
 
-      responseType.accessToken.should.equal('foo');
+      expect(responseType.accessToken).to.equal('foo');
     });
 
-    it('should set the `accessTokenLifetime`', function () {
+    it('sets the `accessTokenLifetime`', function () {
       const responseType = new BearerTokenType('foo', 'bar');
 
-      responseType.accessTokenLifetime.should.equal('bar');
+      expect(responseType.accessTokenLifetime).to.equal('bar');
     });
 
-    it('should set the `refreshToken`', function () {
+    it('sets the `refreshToken`', function () {
       const responseType = new BearerTokenType('foo', 'bar', 'biz');
 
-      responseType.refreshToken.should.equal('biz');
+      expect(responseType.refreshToken).to.equal('biz');
     });
   });
 
   describe('valueOf()', function () {
-    it('should return the value representation', function () {
+    it('returns the value representation', function () {
       const responseType = new BearerTokenType('foo', 'bar');
-      const value = responseType.valueOf();
 
-      value.should.eql({
+      expect(responseType.valueOf()).to.eql({
         access_token: 'foo',
         expires_in: 'bar',
-        token_type: 'Bearer',
+        token_type: 'Bearer'
       });
     });
 
-    it('should not include the `expires_in` if not given', function () {
+    it('excludes the `expires_in` if not given', function () {
       const responseType = new BearerTokenType('foo');
-      const value = responseType.valueOf();
 
-      value.should.eql({
+      expect(responseType.valueOf()).to.eql({
         access_token: 'foo',
-        token_type: 'Bearer',
+        token_type: 'Bearer'
       });
     });
 
-    it('should set `refresh_token` if `refreshToken` is defined', function () {
+    it('sets `refresh_token` if `refreshToken` is defined', function () {
       const responseType = new BearerTokenType('foo', 'bar', 'biz');
-      const value = responseType.valueOf();
 
-      value.should.eql({
+      expect(responseType.valueOf()).to.eql({
         access_token: 'foo',
         expires_in: 'bar',
         refresh_token: 'biz',
-        token_type: 'Bearer',
+        token_type: 'Bearer'
       });
     });
 
-    it('should set `expires_in` if `accessTokenLifetime` is defined', function () {
+    it('sets `expires_in` if `accessTokenLifetime` is defined', function () {
       const responseType = new BearerTokenType('foo', 'bar', 'biz');
-      const value = responseType.valueOf();
 
-      value.should.eql({
+      expect(responseType.valueOf()).to.eql({
         access_token: 'foo',
         expires_in: 'bar',
         refresh_token: 'biz',
-        token_type: 'Bearer',
+        token_type: 'Bearer'
       });
     });
   });

@@ -61,21 +61,19 @@ import DB from '../helpers/db.js';
 import createModel from '../helpers/model.js';
 import createRequest from '../helpers/request.js';
 import Response from '../../lib/response.js';
-
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 const db = new DB();
 
 const auth = new OAuth2Server({
-  model: createModel(db),
+  model: createModel(db)
 });
 
 const user = db.saveUser({ id: 1, username: 'test', password: 'test' });
 const client = db.saveClient({
   id: 'a',
   secret: 'b',
-  grants: ['password', 'refresh_token'],
+  grants: ['password', 'refresh_token']
 });
 const scope = 'read write';
 
@@ -85,15 +83,15 @@ function createLoginRequest() {
       grant_type: 'password',
       username: user.username,
       password: user.password,
-      scope,
+      scope
     },
     headers: {
       authorization:
         'Basic ' +
         Buffer.from(client.id + ':' + client.secret).toString('base64'),
-      'content-type': 'application/x-www-form-urlencoded',
+      'content-type': 'application/x-www-form-urlencoded'
     },
-    method: 'POST',
+    method: 'POST'
   });
 }
 
@@ -103,14 +101,14 @@ function createRefreshRequest(refresh_token) {
     body: {
       grant_type: 'refresh_token',
       refresh_token,
-      scope,
+      scope
     },
     headers: {
       authorization:
         'Basic ' +
         Buffer.from(client.id + ':' + client.secret).toString('base64'),
-      'content-type': 'application/x-www-form-urlencoded',
-    },
+      'content-type': 'application/x-www-form-urlencoded'
+    }
   });
 }
 
@@ -127,20 +125,20 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       const token = await auth.token(refreshRequest, refreshResponse, {});
 
-      refreshResponse.body.token_type.should.equal('Bearer');
-      refreshResponse.body.access_token.should.equal(token.accessToken);
-      refreshResponse.body.refresh_token.should.equal(token.refreshToken);
-      refreshResponse.body.expires_in.should.be.a('number');
-      refreshResponse.body.scope.should.eql('read write');
+      expect(refreshResponse.body.token_type).to.equal('Bearer');
+      expect(refreshResponse.body.access_token).to.equal(token.accessToken);
+      expect(refreshResponse.body.refresh_token).to.equal(token.refreshToken);
+      expect(refreshResponse.body.expires_in).to.be.a('number');
+      expect(refreshResponse.body.scope).to.eql('read write');
 
-      token.accessToken.should.be.a('string');
-      token.refreshToken.should.be.a('string');
-      token.accessTokenExpiresAt.should.be.a('date');
-      token.refreshTokenExpiresAt.should.be.a('date');
-      token.scope.should.eql(['read', 'write']);
+      expect(token.accessToken).to.be.a('string');
+      expect(token.refreshToken).to.be.a('string');
+      expect(token.accessTokenExpiresAt).to.be.a('date');
+      expect(token.refreshTokenExpiresAt).to.be.a('date');
+      expect(token.scope).to.eql(['read', 'write']);
 
-      db.accessTokens.has(token.accessToken).should.equal(true);
-      db.refreshTokens.has(token.refreshToken).should.equal(true);
+      expect(db.accessTokens.has(token.accessToken)).to.equal(true);
+      expect(db.refreshTokens.has(token.refreshToken)).to.equal(true);
     });
 
     it('Should throw invalid_grant error', async function () {
@@ -153,7 +151,7 @@ describe('RefreshTokenGrantType Compliance', function () {
           throw Error('Should not reach this');
         })
         .catch((err) => {
-          err.name.should.equal('invalid_grant');
+          expect(err.name).to.equal('invalid_grant');
         });
     });
 
@@ -170,9 +168,9 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       await auth
         .token(refreshRequest, refreshResponse, {})
-        .then(should.fail)
+        .then(expect.fail)
         .catch((err) => {
-          err.name.should.equal('invalid_scope');
+          expect(err.name).to.equal('invalid_scope');
         });
     });
 
@@ -191,9 +189,9 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       await auth
         .token(refreshRequest, refreshResponse, {})
-        .then(should.fail)
+        .then(expect.fail)
         .catch((err) => {
-          err.name.should.equal('invalid_scope');
+          expect(err.name).to.equal('invalid_scope');
         });
     });
 
@@ -212,9 +210,9 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       await auth
         .token(refreshRequest, refreshResponse, {})
-        .then(should.fail)
+        .then(expect.fail)
         .catch((err) => {
-          err.name.should.equal('invalid_scope');
+          expect(err.name).to.equal('invalid_scope');
         });
     });
 
@@ -231,11 +229,11 @@ describe('RefreshTokenGrantType Compliance', function () {
 
       const token = await auth.token(refreshRequest, refreshResponse, {});
 
-      refreshResponse.body.token_type.should.equal('Bearer');
-      refreshResponse.body.access_token.should.equal(token.accessToken);
-      refreshResponse.body.refresh_token.should.equal(token.refreshToken);
-      refreshResponse.body.expires_in.should.be.a('number');
-      refreshResponse.body.scope.should.eql('read');
+      expect(refreshResponse.body.token_type).to.equal('Bearer');
+      expect(refreshResponse.body.access_token).to.equal(token.accessToken);
+      expect(refreshResponse.body.refresh_token).to.equal(token.refreshToken);
+      expect(refreshResponse.body.expires_in).to.be.a('number');
+      expect(refreshResponse.body.scope).to.eql('read');
     });
   });
 });

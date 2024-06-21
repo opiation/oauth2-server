@@ -19,9 +19,7 @@ import DB from '../helpers/db.js';
 import createModel from '../helpers/model.js';
 import createRequest from '../helpers/request.js';
 import Response from '../../lib/response.js';
-
-import Chai from 'chai';
-Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 const db = new DB();
 // this user represents requests in the name of an external server
@@ -38,14 +36,14 @@ const oAuth2Server = new OAuth2Server({
       // but we need to return a truthy response to
       const client = db.findClient(_client.id, _client.secret);
       return client && { ...userDoc };
-    },
-  },
+    }
+  }
 });
 
 const clientDoc = db.saveClient({
   id: 'client-credential-test-client',
   secret: 'client-credential-test-secret',
-  grants: ['client_credentials'],
+  grants: ['client_credentials']
 });
 
 const enabledScope = 'read write';
@@ -75,7 +73,7 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
       const request = createRequest({
         body: {
           grant_type: 'client_credentials',
-          scope: enabledScope,
+          scope: enabledScope
         },
         headers: {
           authorization:
@@ -83,32 +81,32 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
             Buffer.from(clientDoc.id + ':' + clientDoc.secret).toString(
               'base64'
             ),
-          'content-type': 'application/x-www-form-urlencoded',
+          'content-type': 'application/x-www-form-urlencoded'
         },
-        method: 'POST',
+        method: 'POST'
       });
 
       const token = await oAuth2Server.token(request, response);
 
-      response.status.should.equal(200);
-      response.headers.should.deep.equal({
+      expect(response.status).to.equal(200);
+      expect(response.headers).to.deep.equal({
         'cache-control': 'no-store',
-        pragma: 'no-cache',
+        pragma: 'no-cache'
       });
-      response.body.token_type.should.equal('Bearer');
-      response.body.access_token.should.equal(token.accessToken);
-      response.body.expires_in.should.be.a('number');
-      response.body.scope.should.eql('read write');
-      ('refresh_token' in response.body).should.equal(false);
+      expect(response.body.token_type).to.equal('Bearer');
+      expect(response.body.access_token).to.equal(token.accessToken);
+      expect(response.body.expires_in).to.be.a('number');
+      expect(response.body.scope).to.eql('read write');
+      expect(response.body).not.to.have.property('refresh_token');
 
-      token.accessToken.should.be.a('string');
-      token.accessTokenExpiresAt.should.be.a('date');
-      ('refreshToken' in token).should.equal(false);
-      ('refreshTokenExpiresAt' in token).should.equal(false);
-      token.scope.should.eql(['read', 'write']);
+      expect(token.accessToken).to.be.a('string');
+      expect(token.accessTokenExpiresAt).to.be.a('date');
+      expect(token).not.to.have.a.property('refreshToken');
+      expect(token).not.to.have.a.property('refreshTokenExpiresAt');
+      expect(token.scope).to.eql(['read', 'write']);
 
-      db.accessTokens.has(token.accessToken).should.equal(true);
-      db.refreshTokens.has(token.refreshToken).should.equal(false);
+      expect(db.accessTokens.has(token.accessToken)).to.equal(true);
+      expect(db.refreshTokens.has(token.refreshToken)).to.equal(false);
     });
 
     /**
@@ -129,22 +127,23 @@ describe('ClientCredentials Workflow Compliance (4.4)', function () {
       const request = createRequest({
         query: {},
         headers: {
-          authorization: `Bearer ${accessToken}`,
+          authorization: `Bearer ${accessToken}`
         },
-        method: 'GET',
+        method: 'GET'
       });
 
       const token = await oAuth2Server.authenticate(request, response);
-      token.accessToken.should.equal(accessToken);
-      token.user.should.deep.equal(userDoc);
-      token.client.should.deep.equal(clientDoc);
-      token.scope.should.eql(['read', 'write']);
 
-      response.status.should.equal(200);
+      expect(token.accessToken).to.equal(accessToken);
+      expect(token.user).to.deep.equal(userDoc);
+      expect(token.client).to.deep.equal(clientDoc);
+      expect(token.scope).to.eql(['read', 'write']);
+
+      expect(response.status).to.equal(200);
       // there should be no information in the response as it
       // should only add information, if permission is denied
-      response.body.should.deep.equal({});
-      response.headers.should.deep.equal({});
+      expect(response.body).to.deep.equal({});
+      expect(response.headers).to.deep.equal({});
     });
   });
 });

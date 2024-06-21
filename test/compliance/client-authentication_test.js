@@ -24,8 +24,7 @@ import createModel from '../helpers/model.js';
 import createRequest from '../helpers/request.js';
 import Response from '../../lib/response.js';
 
-import Chai from 'chai';
-Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 const db = new DB();
 
@@ -57,7 +56,7 @@ function createDefaultRequest() {
 
 describe('Client Authentication Compliance', function () {
   describe('No authentication', function () {
-    it('should be an unsuccesfull authentication', async function () {
+    it('returns an invalid_client error', async function () {
       const request = createDefaultRequest();
       const response = new Response({});
 
@@ -69,20 +68,20 @@ describe('Client Authentication Compliance', function () {
           throw new Error('Should not be here');
         })
         .catch((err) => {
-          err.name.should.equal('invalid_client');
+          expect(err.name).to.equal('invalid_client');
         });
     });
   });
 
   describe('Basic Authentication', function () {
-    it('should be a succesfull authentication', async function () {
+    it('returns a token with the successful authentication', async function () {
       const request = createDefaultRequest();
       const response = new Response({});
 
       await auth.token(request, response, {});
     });
 
-    it('should be an unsuccesfull authentication', async function () {
+    it('returns an invalid_client error', async function () {
       const request = createDefaultRequest();
       const response = new Response({});
 
@@ -95,13 +94,13 @@ describe('Client Authentication Compliance', function () {
           throw new Error('Should not be here');
         })
         .catch((err) => {
-          err.name.should.equal('invalid_client');
+          expect(err.name).to.equal('invalid_client');
         });
     });
   });
 
   describe('Request body authentication', function () {
-    it('should be a succesfull authentication', async function () {
+    it('returns a token with the successful authentication', async function () {
       const request = createDefaultRequest();
       const response = new Response({});
 
@@ -113,7 +112,7 @@ describe('Client Authentication Compliance', function () {
       await auth.token(request, response, {});
     });
 
-    it('should be an unsuccesfull authentication', async function () {
+    it('returns an invalid_client error', async function () {
       const request = createDefaultRequest();
       const response = new Response({});
 
@@ -128,7 +127,7 @@ describe('Client Authentication Compliance', function () {
           throw new Error('Should not be here');
         })
         .catch((err) => {
-          err.name.should.equal('invalid_client');
+          expect(err.name).to.equal('invalid_client');
         });
     });
   });

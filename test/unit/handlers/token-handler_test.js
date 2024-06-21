@@ -6,9 +6,7 @@
 
 import Request from '../../../lib/request.js';
 import TokenHandler from '../../../lib/handlers/token-handler.js';
-import sinon from 'sinon';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it, sinon } from '../../test-utils.js';
 
 /**
  * Test `TokenHandler`.
@@ -16,33 +14,33 @@ const should = Chai.should();
 
 describe('TokenHandler', function () {
   describe('getClient()', function () {
-    it('should call `model.getClient()`', function () {
+    it('calls `model.getClient()`', function () {
       const model = {
         getClient: sinon.stub().returns({ grants: ['password'] }),
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const handler = new TokenHandler({
         accessTokenLifetime: 120,
         model: model,
-        refreshTokenLifetime: 120,
+        refreshTokenLifetime: 120
       });
       const request = new Request({
         body: { client_id: 12345, client_secret: 'secret' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return handler
         .getClient(request)
         .then(function () {
-          model.getClient.callCount.should.equal(1);
-          model.getClient.firstCall.args.should.have.length(2);
-          model.getClient.firstCall.args[0].should.equal(12345);
-          model.getClient.firstCall.args[1].should.equal('secret');
-          model.getClient.firstCall.thisValue.should.equal(model);
+          expect(model.getClient.callCount).to.equal(1);
+          expect(model.getClient.firstCall.args).to.have.length(2);
+          expect(model.getClient.firstCall.args[0]).to.equal(12345);
+          expect(model.getClient.firstCall.args[1]).to.equal('secret');
+          expect(model.getClient.firstCall.thisValue).to.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 });

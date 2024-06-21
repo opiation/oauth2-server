@@ -4,11 +4,10 @@
  * Module dependencies.
  */
 
+import url from 'node:url';
 import CodeResponseType from '../../../lib/response-types/code-response-type.js';
 import InvalidArgumentError from '../../../lib/errors/invalid-argument-error.js';
-import Chai from 'chai';
-const should = Chai.should();
-import url from 'node:url';
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `CodeResponseType` integration.
@@ -16,56 +15,58 @@ import url from 'node:url';
 
 describe('CodeResponseType integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `code` is missing', function () {
+    it('throws an error if `code` is missing', function () {
       try {
         new CodeResponseType();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `code`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `code`');
       }
     });
 
-    it('should set the `code`', function () {
+    it('sets the `code`', function () {
       const responseType = new CodeResponseType('foo');
 
-      responseType.code.should.equal('foo');
+      expect(responseType.code).to.equal('foo');
     });
   });
 
   describe('buildRedirectUri()', function () {
-    it('should throw an error if the `redirectUri` is missing', function () {
+    it('throws an error if the `redirectUri` is missing', function () {
       const responseType = new CodeResponseType('foo');
 
       try {
         responseType.buildRedirectUri();
 
-        should.fail();
+        expect.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(InvalidArgumentError);
-        e.message.should.equal('Missing parameter: `redirectUri`');
+        expect(e).to.be.an.instanceOf(InvalidArgumentError);
+        expect(e.message).to.equal('Missing parameter: `redirectUri`');
       }
     });
 
-    it('should return the new redirect uri and set the `code` and `state` in the query', function () {
+    it('returns the new redirect uri and set the `code` and `state` in the query', function () {
       const responseType = new CodeResponseType('foo');
       const redirectUri = responseType.buildRedirectUri(
         'http://example.com/cb'
       );
 
-      url.format(redirectUri).should.equal('http://example.com/cb?code=foo');
+      expect(url.format(redirectUri)).to.equal(
+        'http://example.com/cb?code=foo'
+      );
     });
 
-    it('should return the new redirect uri and append the `code` and `state` in the query', function () {
+    it('returns the new redirect uri and append the `code` and `state` in the query', function () {
       const responseType = new CodeResponseType('foo');
       const redirectUri = responseType.buildRedirectUri(
         'http://example.com/cb?foo=bar'
       );
 
-      url
-        .format(redirectUri)
-        .should.equal('http://example.com/cb?foo=bar&code=foo');
+      expect(url.format(redirectUri)).to.equal(
+        'http://example.com/cb?foo=bar&code=foo'
+      );
     });
   });
 });

@@ -1,8 +1,5 @@
 import { getLifetimeFromExpiresAt } from '../../../lib/utils/date-util.js';
-
-import sinon from 'sinon';
-import Chai from 'chai';
-Chai.should();
+import { beforeEach, describe, expect, it, sinon } from '../../test-utils.js';
 
 describe('DateUtil', function () {
   describe('getLifetimeFromExpiresAt', () => {
@@ -12,12 +9,12 @@ describe('DateUtil', function () {
       sinon.useFakeTimers(now);
     });
 
-    it('should convert a valid expiration date into seconds from now', () => {
+    it('converts a valid expiration date into seconds from now', () => {
       const expiresAt = new Date('2023-01-01T00:00:10.000Z');
       const lifetime = getLifetimeFromExpiresAt(expiresAt);
 
-      lifetime.should.be.a('number');
-      lifetime.should.be.approximately(10, 2);
+      expect(lifetime).to.be.a('number');
+      expect(lifetime).to.be.approximately(10, 2);
     });
 
     afterEach(() => {

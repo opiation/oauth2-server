@@ -8,8 +8,7 @@ import InvalidArgumentError from '../../lib/errors/invalid-argument-error.js';
 import Request from '../../lib/request.js';
 import Response from '../../lib/response.js';
 import Server from '../../lib/server.js';
-import Chai from 'chai';
-const should = Chai.should();
+import { describe, expect, it } from '../test-utils.js';
 
 /**
  * Test `Server` integration.
@@ -17,158 +16,158 @@ const should = Chai.should();
 
 describe('Server integration', function () {
   describe('constructor()', function () {
-    it('should throw an error if `model` is missing', function () {
+    it('throws an error if `model` is missing', function () {
       [null, undefined, {}].forEach((options) => {
         try {
           new Server(options);
 
-          should.fail();
+          expect.fail();
         } catch (e) {
-          e.should.be.an.instanceOf(InvalidArgumentError);
-          e.message.should.equal('Missing parameter: `model`');
+          expect(e).to.be.an.instanceOf(InvalidArgumentError);
+          expect(e.message).to.equal('Missing parameter: `model`');
         }
       });
     });
 
-    it('should set the `model`', function () {
+    it('sets the `model`', function () {
       const model = {};
       const server = new Server({ model: model });
 
-      server.options.model.should.equal(model);
+      expect(server.options.model).to.equal(model);
     });
   });
 
   describe('authenticate()', function () {
-    it('should set the default `options`', async function () {
+    it('sets the default `options`', async function () {
       const model = {
         getAccessToken: function () {
           return {
             user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000),
+            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
           };
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
         body: {},
         headers: { Authorization: 'Bearer foo' },
         method: {},
-        query: {},
+        query: {}
       });
       const response = new Response({ body: {}, headers: {} });
 
       try {
         await server.authenticate(request, response);
       } catch (e) {
-        server.addAcceptedScopesHeader.should.be.true;
-        server.addAuthorizedScopesHeader.should.be.true;
-        server.allowBearerTokensInQueryString.should.be.false;
-        should.fail();
+        expect(server.addAcceptedScopesHeader).to.be.true;
+        expect(server.addAuthorizedScopesHeader).to.be.true;
+        expect(server.allowBearerTokensInQueryString).to.be.false;
+        expect.fail();
       }
     });
 
-    it('should return a promise', function () {
+    it('returns a promise', function () {
       const model = {
         getAccessToken: async function (token) {
           return {
             user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000),
+            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
           };
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
         body: {},
         headers: { Authorization: 'Bearer foo' },
         method: {},
-        query: {},
+        query: {}
       });
       const response = new Response({ body: {}, headers: {} });
       const handler = server.authenticate(request, response);
 
-      handler.should.be.an.instanceOf(Promise);
+      expect(handler).to.be.an.instanceOf(Promise);
     });
   });
 
   describe('authorize()', function () {
-    it('should set the default `options`', async function () {
+    it('sets the default `options`', async function () {
       const model = {
         getAccessToken: function () {
           return {
             user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000),
+            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
           };
         },
         getClient: function () {
           return {
             grants: ['authorization_code'],
-            redirectUris: ['http://example.com/cb'],
+            redirectUris: ['http://example.com/cb']
           };
         },
         saveAuthorizationCode: function () {
           return { authorizationCode: 123 };
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
         body: {
           client_id: 1234,
           client_secret: 'secret',
-          response_type: 'code',
+          response_type: 'code'
         },
         headers: { Authorization: 'Bearer foo' },
         method: {},
-        query: { state: 'foobar' },
+        query: { state: 'foobar' }
       });
       const response = new Response({ body: {}, headers: {} });
 
       try {
         await server.authorize(request, response);
       } catch (e) {
-        server.allowEmptyState.should.be.false;
-        server.authorizationCodeLifetime.should.equal(300);
-        should.fail();
+        expect(server.allowEmptyState).to.be.false;
+        expect(server.authorizationCodeLifetime).to.equal(300);
+        expect.fail();
       }
     });
 
-    it('should return a promise', function () {
+    it('returns a promise', function () {
       const model = {
         getAccessToken: function () {
           return {
             user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000),
+            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
           };
         },
         getClient: function () {
           return {
             grants: ['authorization_code'],
-            redirectUris: ['http://example.com/cb'],
+            redirectUris: ['http://example.com/cb']
           };
         },
         saveAuthorizationCode: function () {
           return { authorizationCode: 123 };
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
         body: {
           client_id: 1234,
           client_secret: 'secret',
-          response_type: 'code',
+          response_type: 'code'
         },
         headers: { Authorization: 'Bearer foo' },
         method: {},
-        query: { state: 'foobar' },
+        query: { state: 'foobar' }
       });
       const response = new Response({ body: {}, headers: {} });
       const handler = server.authorize(request, response);
 
-      handler.should.be.an.instanceOf(Promise);
+      expect(handler).to.be.an.instanceOf(Promise);
     });
   });
 
   describe('token()', function () {
-    it('should set the default `options`', async function () {
+    it('sets the default `options`', async function () {
       const model = {
         getClient: function () {
           return { grants: ['password'] };
@@ -181,7 +180,7 @@ describe('Server integration', function () {
         },
         validateScope: function () {
           return ['foo'];
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
@@ -191,27 +190,27 @@ describe('Server integration', function () {
           grant_type: 'password',
           username: 'foo',
           password: 'pass',
-          scope: 'foo',
+          scope: 'foo'
         },
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: 'POST',
-        query: {},
+        query: {}
       });
       const response = new Response({ body: {}, headers: {} });
 
       try {
         await server.token(request, response);
       } catch (e) {
-        server.accessTokenLifetime.should.equal(3600);
-        server.refreshTokenLifetime.should.equal(1209600);
-        should.fail();
+        expect(server.accessTokenLifetime).to.equal(3600);
+        expect(server.refreshTokenLifetime).to.equal(1209600);
+        expect.fail();
       }
     });
 
-    it('should return a promise', function () {
+    it('returns a promise', function () {
       const model = {
         getClient: function () {
           return { grants: ['password'] };
@@ -221,7 +220,7 @@ describe('Server integration', function () {
         },
         saveToken: function () {
           return { accessToken: 1234, client: {}, user: {} };
-        },
+        }
       };
       const server = new Server({ model: model });
       const request = new Request({
@@ -230,19 +229,19 @@ describe('Server integration', function () {
           client_secret: 'secret',
           grant_type: 'password',
           username: 'foo',
-          password: 'pass',
+          password: 'pass'
         },
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
-          'transfer-encoding': 'chunked',
+          'transfer-encoding': 'chunked'
         },
         method: 'POST',
-        query: {},
+        query: {}
       });
       const response = new Response({ body: {}, headers: {} });
       const handler = server.token(request, response);
 
-      handler.should.be.an.instanceOf(Promise);
+      expect(handler).to.be.an.instanceOf(Promise);
     });
   });
 });

@@ -5,6 +5,7 @@
  */
 
 import { generateRandomToken } from '../../../lib/utils/token-util.js';
+import { describe, expect, it } from '../../test-utils.js';
 
 /**
  * Test `TokenUtil` integration.
@@ -12,9 +13,9 @@ import { generateRandomToken } from '../../../lib/utils/token-util.js';
 
 describe('TokenUtil integration', function () {
   describe('generateRandomToken()', function () {
-    it('should return a sha-256 token', async function () {
+    it('returns a sha-256 token', async function () {
       const token = await generateRandomToken();
-      token.should.be.a.sha256();
+      expect(token).to.be.a.sha256();
     });
   });
 });

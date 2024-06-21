@@ -7,10 +7,8 @@
 import AuthenticateHandler from '../../../lib/handlers/authenticate-handler.js';
 import InvalidRequestError from '../../../lib/errors/invalid-request-error.js';
 import Request from '../../../lib/request.js';
-import sinon from 'sinon';
-import Chai from 'chai';
-const should = Chai.should();
 import ServerError from '../../../lib/errors/server-error.js';
+import { describe, expect, it, sinon } from '../../test-utils.js';
 
 /**
  * Test `AuthenticateHandler`.
@@ -19,50 +17,52 @@ import ServerError from '../../../lib/errors/server-error.js';
 describe('AuthenticateHandler', function () {
   describe('getTokenFromRequest()', function () {
     describe('with bearer token in the request authorization header', function () {
-      it('should throw an error if the token is malformed', () => {
+      it('throws an error if the token is malformed', () => {
         const handler = new AuthenticateHandler({
-          model: { getAccessToken() {} },
+          model: { getAccessToken() {} }
         });
         const request = new Request({
           body: {},
           headers: {
-            Authorization: 'foo Bearer bar',
+            Authorization: 'foo Bearer bar'
           },
           method: 'ANY',
-          query: {},
+          query: {}
         });
 
         try {
           handler.getTokenFromRequestHeader(request);
 
-          should.fail('should.fail', '');
+          expect.fail('expect.fail', '');
         } catch (e) {
-          e.should.be.an.instanceOf(InvalidRequestError);
-          e.message.should.equal(
-            'Invalid request: malformed authorization header'
-          );
+          expect(e)
+            .to.be.an.instanceOf(InvalidRequestError)
+            .and.to.have.a.property(
+              'message',
+              'Invalid request: malformed authorization header'
+            );
         }
       });
     });
 
     describe('with bearer token in the request authorization header', function () {
-      it('should call `getTokenFromRequestHeader()`', function () {
+      it('calls `getTokenFromRequestHeader()`', function () {
         const handler = new AuthenticateHandler({
-          model: { getAccessToken: function () {} },
+          model: { getAccessToken: function () {} }
         });
         const request = new Request({
           body: {},
           headers: { Authorization: 'Bearer foo' },
           method: {},
-          query: {},
+          query: {}
         });
 
         sinon.stub(handler, 'getTokenFromRequestHeader');
 
         handler.getTokenFromRequest(request);
 
-        handler.getTokenFromRequestHeader.callCount.should.equal(1);
-        handler.getTokenFromRequestHeader.firstCall.args[0].should.equal(
+        expect(handler.getTokenFromRequestHeader.callCount).to.equal(1);
+        expect(handler.getTokenFromRequestHeader.firstCall.args).to.include(
           request
         );
         handler.getTokenFromRequestHeader.restore();
@@ -70,23 +70,23 @@ describe('AuthenticateHandler', function () {
     });
 
     describe('with bearer token in the request query', function () {
-      it('should call `getTokenFromRequestQuery()`', function () {
+      it('calls `getTokenFromRequestQuery()`', function () {
         const handler = new AuthenticateHandler({
-          model: { getAccessToken: function () {} },
+          model: { getAccessToken: function () {} }
         });
         const request = new Request({
           body: {},
           headers: {},
           method: {},
-          query: { access_token: 'foo' },
+          query: { access_token: 'foo' }
         });
 
         sinon.stub(handler, 'getTokenFromRequestQuery');
 
         handler.getTokenFromRequest(request);
 
-        handler.getTokenFromRequestQuery.callCount.should.equal(1);
-        handler.getTokenFromRequestQuery.firstCall.args[0].should.equal(
+        expect(handler.getTokenFromRequestQuery.callCount).to.equal(1);
+        expect(handler.getTokenFromRequestQuery.firstCall.args).to.include(
           request
         );
         handler.getTokenFromRequestQuery.restore();
@@ -94,104 +94,108 @@ describe('AuthenticateHandler', function () {
     });
 
     describe('with bearer token in the request body', function () {
-      it('should call `getTokenFromRequestBody()`', function () {
+      it('calls `getTokenFromRequestBody()`', function () {
         const handler = new AuthenticateHandler({
-          model: { getAccessToken: function () {} },
+          model: { getAccessToken: function () {} }
         });
         const request = new Request({
           body: { access_token: 'foo' },
           headers: {},
           method: {},
-          query: {},
+          query: {}
         });
 
         sinon.stub(handler, 'getTokenFromRequestBody');
 
         handler.getTokenFromRequest(request);
 
-        handler.getTokenFromRequestBody.callCount.should.equal(1);
-        handler.getTokenFromRequestBody.firstCall.args[0].should.equal(request);
+        expect(handler.getTokenFromRequestBody.callCount).to.equal(1);
+        expect(handler.getTokenFromRequestBody.firstCall.args).to.include(
+          request
+        );
         handler.getTokenFromRequestBody.restore();
       });
     });
   });
 
   describe('getAccessToken()', function () {
-    it('should call `model.getAccessToken()`', function () {
+    it('calls `model.getAccessToken()`', function () {
       const model = {
-        getAccessToken: sinon.stub().returns({ user: {} }),
+        getAccessToken: sinon.stub().returns({ user: {} })
       };
       const handler = new AuthenticateHandler({ model: model });
 
       return handler
         .getAccessToken('foo')
         .then(function () {
-          model.getAccessToken.callCount.should.equal(1);
-          model.getAccessToken.firstCall.args.should.have.length(1);
-          model.getAccessToken.firstCall.args[0].should.equal('foo');
-          model.getAccessToken.firstCall.thisValue.should.equal(model);
+          expect(model.getAccessToken.callCount).to.equal(1);
+          expect(model.getAccessToken.firstCall).to.deep.include({
+            args: ['foo'],
+            thisValue: model
+          });
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('validateAccessToken()', function () {
-    it('should fail if token has no valid `accessTokenExpiresAt` date', function () {
+    it('fails if token has no valid `accessTokenExpiresAt` date', function () {
       const model = {
-        getAccessToken: function () {},
+        getAccessToken: function () {}
       };
       const handler = new AuthenticateHandler({ model: model });
 
       let failed = false;
       try {
         handler.validateAccessToken({
-          user: {},
+          user: {}
         });
       } catch (err) {
-        err.should.be.an.instanceOf(ServerError);
+        expect(err).to.be.an.instanceOf(ServerError);
         failed = true;
       }
-      failed.should.equal(true);
+      expect(failed).to.be.true;
     });
 
-    it('should succeed if token has valid `accessTokenExpiresAt` date', function () {
+    it('succeeds if token has valid `accessTokenExpiresAt` date', function () {
       const model = {
-        getAccessToken: function () {},
+        getAccessToken: function () {}
       };
       const handler = new AuthenticateHandler({ model: model });
       try {
         handler.validateAccessToken({
           user: {},
-          accessTokenExpiresAt: new Date(new Date().getTime() + 10000),
+          accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
         });
       } catch (err) {
-        should.fail();
+        expect.fail();
       }
     });
   });
 
   describe('verifyScope()', function () {
-    it('should call `model.getAccessToken()` if scope is defined', function () {
+    it('calls `model.getAccessToken()` if scope is defined', function () {
       const model = {
         getAccessToken: function () {},
-        verifyScope: sinon.stub().returns(true),
+        verifyScope: sinon.stub().returns(true)
       };
       const handler = new AuthenticateHandler({
         addAcceptedScopesHeader: true,
         addAuthorizedScopesHeader: true,
         model: model,
-        scope: 'bar',
+        scope: 'bar'
       });
 
       return handler
         .verifyScope(['foo'])
         .then(function () {
-          model.verifyScope.callCount.should.equal(1);
-          model.verifyScope.firstCall.args.should.have.length(2);
-          model.verifyScope.firstCall.args[0].should.eql(['foo'], ['bar']);
-          model.verifyScope.firstCall.thisValue.should.equal(model);
+          expect(model.verifyScope.callCount).to.equal(1);
+          expect(model.verifyScope.firstCall).to.deep.include({
+            args: [['foo'], ['bar']],
+            thisValue: model
+          });
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 });

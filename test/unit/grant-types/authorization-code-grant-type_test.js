@@ -4,15 +4,13 @@
  * Module dependencies.
  */
 
-import Chai from 'chai';
 import crypto from 'node:crypto';
-import sinon from 'sinon';
 import AuthorizationCodeGrantType from '../../../lib/grant-types/authorization-code-grant-type.js';
 import InvalidGrantError from '../../../lib/errors/invalid-grant-error.js';
 import ServerError from '../../../lib/errors/server-error.js';
 import Request from '../../../lib/request.js';
 import { base64URLEncode } from '../../../lib/utils/string-util.js';
-const should = Chai.should();
+import { describe, expect, it, sinon } from '../../test-utils.js';
 
 /**
  * Test `AuthorizationCodeGrantType`.
@@ -20,80 +18,86 @@ const should = Chai.should();
 
 describe('AuthorizationCodeGrantType', function () {
   describe('getAuthorizationCode()', function () {
-    it('should call `model.getAuthorizationCode()`', function () {
+    it('calls `model.getAuthorizationCode()`', function () {
       const model = {
         getAuthorizationCode: sinon.stub().returns({
           authorizationCode: 12345,
           client: {},
           expiresAt: new Date(new Date() * 2),
-          user: {},
+          user: {}
         }),
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const handler = new AuthorizationCodeGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345 },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
       const client = {};
 
       return handler
         .getAuthorizationCode(request, client)
         .then(function () {
-          model.getAuthorizationCode.callCount.should.equal(1);
-          model.getAuthorizationCode.firstCall.args.should.have.length(1);
-          model.getAuthorizationCode.firstCall.args[0].should.equal(12345);
-          model.getAuthorizationCode.firstCall.thisValue.should.equal(model);
+          expect(model.getAuthorizationCode.callCount).to.equal(1);
+          expect(model.getAuthorizationCode.firstCall.args).to.have.length(1);
+          expect(model.getAuthorizationCode.firstCall.args[0]).to.equal(12345);
+          expect(model.getAuthorizationCode.firstCall.thisValue).to.equal(
+            model
+          );
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('revokeAuthorizationCode()', function () {
-    it('should call `model.revokeAuthorizationCode()`', function () {
+    it('calls `model.revokeAuthorizationCode()`', function () {
       const model = {
         getAuthorizationCode: function () {},
         revokeAuthorizationCode: sinon.stub().returns(true),
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const handler = new AuthorizationCodeGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
       const authorizationCode = {};
 
       return handler
         .revokeAuthorizationCode(authorizationCode)
         .then(function () {
-          model.revokeAuthorizationCode.callCount.should.equal(1);
-          model.revokeAuthorizationCode.firstCall.args.should.have.length(1);
-          model.revokeAuthorizationCode.firstCall.args[0].should.equal(
+          expect(model.revokeAuthorizationCode.callCount).to.equal(1);
+          expect(model.revokeAuthorizationCode.firstCall.args).to.have.length(
+            1
+          );
+          expect(model.revokeAuthorizationCode.firstCall.args[0]).to.equal(
             authorizationCode
           );
-          model.revokeAuthorizationCode.firstCall.thisValue.should.equal(model);
+          expect(model.revokeAuthorizationCode.firstCall.thisValue).to.equal(
+            model
+          );
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('saveToken()', function () {
-    it('should call `model.saveToken()`', function () {
+    it('calls `model.saveToken()`', function () {
       const client = {};
       const user = {};
       const model = {
         getAuthorizationCode: function () {},
         revokeAuthorizationCode: function () {},
-        saveToken: sinon.stub().returns(true),
+        saveToken: sinon.stub().returns(true)
       };
       const handler = new AuthorizationCodeGrantType({
         accessTokenLifetime: 120,
-        model: model,
+        model: model
       });
 
       sinon.stub(handler, 'validateScope').returns(['foobiz']);
@@ -113,26 +117,26 @@ describe('AuthorizationCodeGrantType', function () {
       return handler
         .saveToken(user, client, 'foobar', ['foobiz'])
         .then(function () {
-          model.saveToken.callCount.should.equal(1);
-          model.saveToken.firstCall.args.should.have.length(3);
-          model.saveToken.firstCall.args[0].should.eql({
+          expect(model.saveToken.callCount).to.equal(1);
+          expect(model.saveToken.firstCall.args).to.have.length(3);
+          expect(model.saveToken.firstCall.args[0]).to.eql({
             accessToken: 'foo',
             authorizationCode: 'foobar',
             accessTokenExpiresAt: 'biz',
             refreshToken: 'bar',
             refreshTokenExpiresAt: 'baz',
-            scope: ['foobiz'],
+            scope: ['foobiz']
           });
-          model.saveToken.firstCall.args[1].should.equal(client);
-          model.saveToken.firstCall.args[2].should.equal(user);
-          model.saveToken.firstCall.thisValue.should.equal(model);
+          expect(model.saveToken.firstCall.args[1]).to.equal(client);
+          expect(model.saveToken.firstCall.args[2]).to.equal(user);
+          expect(model.saveToken.firstCall.thisValue).to.equal(model);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 
   describe('with PKCE', function () {
-    it('should throw an error if the `code_verifier` is invalid with S256 code challenge method', function () {
+    it('throws an error if the `code_verifier` is invalid with S256 code challenge method', function () {
       const codeVerifier = base64URLEncode(crypto.randomBytes(32));
       const authorizationCode = {
         authorizationCode: 12345,
@@ -142,7 +146,7 @@ describe('AuthorizationCodeGrantType', function () {
         codeChallengeMethod: 'S256',
         codeChallenge: base64URLEncode(
           crypto.createHash('sha256').update(codeVerifier).digest()
-        ),
+        )
       };
       const client = { id: 'foobar', isPublic: true };
       const model = {
@@ -150,29 +154,31 @@ describe('AuthorizationCodeGrantType', function () {
           return authorizationCode;
         },
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new AuthorizationCodeGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345, code_verifier: 'foo' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getAuthorizationCode(request, client)
-        .then(should.fail)
+        .then(expect.fail)
         .catch(function (e) {
-          e.should.be.an.instanceOf(InvalidGrantError);
-          e.message.should.equal('Invalid grant: code verifier is invalid');
+          expect(e)
+            .to.be.an.instanceOf(InvalidGrantError)
+            .and.have.a.property('message')
+            .that.equals('Invalid grant: code verifier is invalid');
         });
     });
 
-    it('should throw an error in getAuthorizationCode if an invalid code challenge method has been saved', function () {
+    it('throws an error in getAuthorizationCode if an invalid code challenge method has been saved', function () {
       const codeVerifier = base64URLEncode(crypto.randomBytes(32));
       const authorizationCode = {
         authorizationCode: 12345,
@@ -182,7 +188,7 @@ describe('AuthorizationCodeGrantType', function () {
         codeChallengeMethod: 'foobar', // assume this bypassed validation
         codeChallenge: base64URLEncode(
           crypto.createHash('sha256').update(codeVerifier).digest()
-        ),
+        )
       };
       const client = { id: 'foobar', isPublic: true };
       const model = {
@@ -190,31 +196,33 @@ describe('AuthorizationCodeGrantType', function () {
           return authorizationCode;
         },
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new AuthorizationCodeGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345, code_verifier: codeVerifier },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getAuthorizationCode(request, client)
-        .then(should.fail)
+        .then(expect.fail)
         .catch(function (e) {
-          e.should.be.an.instanceOf(ServerError);
-          e.message.should.equal(
-            'Server error: `getAuthorizationCode()` did not return a valid `codeChallengeMethod` property'
-          );
+          expect(e)
+            .to.be.an.instanceOf(ServerError)
+            .and.have.a.property('message')
+            .that.equals(
+              'Server error: `getAuthorizationCode()` did not return a valid `codeChallengeMethod` property'
+            );
         });
     });
 
-    it('should throw an error if the `code_verifier` is invalid with plain code challenge method', function () {
+    it('throws an error if the `code_verifier` is invalid with plain code challenge method', function () {
       const codeVerifier = base64URLEncode(crypto.randomBytes(32));
       const authorizationCode = {
         authorizationCode: 12345,
@@ -222,7 +230,7 @@ describe('AuthorizationCodeGrantType', function () {
         expiresAt: new Date(new Date().getTime() * 2),
         user: {},
         codeChallengeMethod: 'plain',
-        codeChallenge: codeVerifier,
+        codeChallenge: codeVerifier
       };
       // fixme: The isPublic option is not used, as a result any client which allows authorization_code grant also accepts PKCE requests.
       const client = { id: 'foobar', isPublic: true };
@@ -231,29 +239,31 @@ describe('AuthorizationCodeGrantType', function () {
           return authorizationCode;
         },
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new AuthorizationCodeGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345, code_verifier: 'foo' },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getAuthorizationCode(request, client)
-        .then(should.fail)
+        .then(expect.fail)
         .catch(function (e) {
-          e.should.be.an.instanceOf(InvalidGrantError);
-          e.message.should.equal('Invalid grant: code verifier is invalid');
+          expect(e)
+            .to.be.an.instanceOf(InvalidGrantError)
+            .and.have.a.property('message')
+            .that.equals('Invalid grant: code verifier is invalid');
         });
     });
 
-    it('should return an auth code when `code_verifier` is valid with S256 code challenge method', function () {
+    it('returns an auth code when `code_verifier` is valid with S256 code challenge method', function () {
       const codeVerifier = base64URLEncode(crypto.randomBytes(32));
       const authorizationCode = {
         authorizationCode: 12345,
@@ -263,7 +273,7 @@ describe('AuthorizationCodeGrantType', function () {
         codeChallengeMethod: 'S256',
         codeChallenge: base64URLEncode(
           crypto.createHash('sha256').update(codeVerifier).digest()
-        ),
+        )
       };
       const client = { id: 'foobar', isPublic: true };
       const model = {
@@ -271,28 +281,28 @@ describe('AuthorizationCodeGrantType', function () {
           return authorizationCode;
         },
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new AuthorizationCodeGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345, code_verifier: codeVerifier },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getAuthorizationCode(request, client)
         .then(function (data) {
-          data.should.equal(authorizationCode);
+          expect(data).to.equal(authorizationCode);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
 
-    it('should return an auth code when `code_verifier` is valid with plain code challenge method', function () {
+    it('returns an auth code when `code_verifier` is valid with plain code challenge method', function () {
       const codeVerifier = base64URLEncode(crypto.randomBytes(32));
       const authorizationCode = {
         authorizationCode: 12345,
@@ -300,7 +310,7 @@ describe('AuthorizationCodeGrantType', function () {
         expiresAt: new Date(new Date().getTime() * 2),
         user: {},
         codeChallengeMethod: 'plain',
-        codeChallenge: codeVerifier,
+        codeChallenge: codeVerifier
       };
       const client = { id: 'foobar', isPublic: true };
       const model = {
@@ -308,25 +318,25 @@ describe('AuthorizationCodeGrantType', function () {
           return authorizationCode;
         },
         revokeAuthorizationCode: function () {},
-        saveToken: function () {},
+        saveToken: function () {}
       };
       const grantType = new AuthorizationCodeGrantType({
         accessTokenLifetime: 123,
-        model: model,
+        model: model
       });
       const request = new Request({
         body: { code: 12345, code_verifier: codeVerifier },
         headers: {},
         method: {},
-        query: {},
+        query: {}
       });
 
       return grantType
         .getAuthorizationCode(request, client)
         .then(function (data) {
-          data.should.equal(authorizationCode);
+          expect(data).to.equal(authorizationCode);
         })
-        .catch(should.fail);
+        .catch(expect.fail);
     });
   });
 });
